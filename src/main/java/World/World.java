@@ -1,8 +1,19 @@
 package World;
 
-public class World {
+import Network.NetworkCreator;
+import Network.NetworkSeed;
+import Network.Network;
 
-    public static void main(String[] args) {
-        WorldCreator worldCreator = new WorldCreator();
+public class World {
+    private Network network;
+
+    public World() {
+        this.makeNetwork();
+    }
+
+    public void makeNetwork() {
+        NetworkCreator networkCreator = new NetworkCreator();
+        NetworkSeed seed = networkCreator.getSeed();
+        this.network = new Network(seed);
     }
 }

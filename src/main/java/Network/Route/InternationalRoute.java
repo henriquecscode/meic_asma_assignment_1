@@ -1,6 +1,6 @@
-package World.Route;
+package Network.Route;
 
-import World.Location.Port;
+import Network.Location.Port;
 
 public class InternationalRoute extends Route{
 

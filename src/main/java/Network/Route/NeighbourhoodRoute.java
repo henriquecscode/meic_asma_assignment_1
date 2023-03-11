@@ -1,7 +1,7 @@
-package World.Route;
+package Network.Route;
 
-import World.Location.City;
-import World.Location.House;
+import Network.Location.City;
+import Network.Location.House;
 
 public class NeighbourhoodRoute extends Route {
 

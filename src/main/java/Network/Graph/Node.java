@@ -1,4 +1,4 @@
-package World.Graph;
+package Network.Graph;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,13 +6,11 @@ import java.util.List;
 public class Node {
     private static int uid = 0;
     private int id;
-    private List<Edge> edges;
-    private List<Node> adjacentNodes;
+    private List<Edge> edges = new ArrayList<>();
+    private List<Node> adjacentNodes = new ArrayList<>();
 
     public Node() {
         this.id = uid;
-        this.edges = new ArrayList<>();
-        this.adjacentNodes = new ArrayList<>();
         uid++;
     }
 

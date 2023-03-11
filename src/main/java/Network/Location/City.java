@@ -1,6 +1,6 @@
-package World.Location;
+package Network.Location;
 
-import World.Graph.Node;
+import Network.Graph.Node;
 
 import java.util.List;
 

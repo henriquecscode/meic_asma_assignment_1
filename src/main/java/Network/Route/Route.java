@@ -1,7 +1,7 @@
-package World.Route;
+package Network.Route;
 
-import World.Graph.Edge;
-import World.Location.Location;
+import Network.Graph.Edge;
+import Network.Location.Location;
 
 public class Route extends Edge {
     private final int distance;

@@ -1,4 +1,4 @@
-package World.Graph;
+package Network.Graph;
 
 import java.util.List;
 

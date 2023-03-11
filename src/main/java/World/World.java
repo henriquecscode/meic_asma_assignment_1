@@ -9,6 +9,7 @@ public class World {
 
     public World() {
         this.makeNetwork();
+        this.network.getGraph().display();
     }
 
     public void makeNetwork() {

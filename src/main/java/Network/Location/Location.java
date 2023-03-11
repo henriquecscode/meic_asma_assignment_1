@@ -1,8 +1,9 @@
-package World.Location;
+package Network.Location;
 
-import World.Graph.Node;
-import World.Route.Route;
+import Network.Graph.Node;
+import Network.Route.Route;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Location extends Node {
@@ -10,12 +11,12 @@ public class Location extends Node {
     private final int level;
 
     //    Nodes of a higher of equal level
-    private List<Location> upperLocations;
-    private List<Route> upperRoutes;
+    private List<Location> upperLocations = new ArrayList<>();
+    private List<Route> upperRoutes = new ArrayList<>();
 
     //    Nodes of a lower level
-    private List<Location> lowerLocations;
-    private List<Route> lowerRoutes;
+    private List<Location> lowerLocations = new ArrayList<>();
+    private List<Route> lowerRoutes = new ArrayList<>();
 
     public Location(String name, int level) {
         super();

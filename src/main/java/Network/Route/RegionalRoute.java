@@ -1,7 +1,7 @@
-package World.Route;
+package Network.Route;
 
-import World.Location.City;
-import World.Location.Port;
+import Network.Location.City;
+import Network.Location.Port;
 
 public class RegionalRoute extends Route {
     public RegionalRoute(City from , Port to, int distance) {

@@ -1,4 +1,4 @@
-package World;
+package Network;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Scanner;
 
 
-public class WorldSeed {
+public class NetworkSeed {
     static final String PATH = "data/seeds/";
     private int numberOfPorts;
     private int numberOfCities;
@@ -17,7 +17,7 @@ public class WorldSeed {
     private List<List<Integer>> cityDistances = new ArrayList<>();
     private List<List<List<Integer>>> houseDistances = new ArrayList<>();
 
-    public WorldSeed(int numberOfPorts, int numberOfCities, int numberOfHouses, List<Integer> portDistances, List<List<Integer>> cityDistances, List<List<List<Integer>>> houseDistances) {
+    public NetworkSeed(int numberOfPorts, int numberOfCities, int numberOfHouses, List<Integer> portDistances, List<List<Integer>> cityDistances, List<List<List<Integer>>> houseDistances) {
         this.numberOfPorts = numberOfPorts;
         this.numberOfCities = numberOfCities;
         this.numberOfHouses = numberOfHouses;
@@ -26,7 +26,7 @@ public class WorldSeed {
         this.houseDistances = houseDistances;
     }
 
-    public WorldSeed(String filename) {
+    public NetworkSeed(String filename) {
         File seed = new File(PATH + filename + ".txt");
         Scanner scanner;
         try {
@@ -65,12 +65,12 @@ public class WorldSeed {
     }
 
     public void saveSeed() {
-        String filename = WorldSeed.getDate() + "_seed";
+        String filename = NetworkSeed.getDate() + "_seed";
         this.saveSeed(filename);
     }
 
     public void saveSeed(String filename) {
-        String filepath = WorldSeed.PATH + filename + ".txt";
+        String filepath = NetworkSeed.PATH + filename + ".txt";
         PrintWriter writer;
         File file = new File(filepath);
         try {

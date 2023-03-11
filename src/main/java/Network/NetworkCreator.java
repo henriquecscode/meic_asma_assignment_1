@@ -1,11 +1,11 @@
-package World;
+package Network;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 // A class to set the properties of the world
-public class WorldCreator {
+public class NetworkCreator {
     private final int MEAN_PORTS = 50;
     private final int MEAN_CITIES = 15;
     private final int MEAN_HOUSES = 6;
@@ -13,9 +13,9 @@ public class WorldCreator {
     private final double STD_CITIES = 5;
     private final double STD_HOUSES = 1.2;
 
-    private WorldSeed seed;
+    private NetworkSeed seed;
 
-    public WorldCreator() {
+    public NetworkCreator() {
         int noPorts = 3;
         int noCities = 5;
         int noHouses = 10;
@@ -51,15 +51,15 @@ public class WorldCreator {
             }
             houseDistances.add(perPortDistance);
         }
-        this.seed = new WorldSeed(noPorts, noCities, noHouses, portDistances, cityDistances, houseDistances);
+        this.seed = new NetworkSeed(noPorts, noCities, noHouses, portDistances, cityDistances, houseDistances);
         this.seed.saveSeed();
     }
 
-    public WorldCreator(String filename) {
-        this.seed = new WorldSeed(filename);
+    public NetworkCreator(String filename) {
+        this.seed = new NetworkSeed(filename);
     }
 
-    public WorldSeed getSeed() {
+    public NetworkSeed getSeed() {
         return seed;
     }
 

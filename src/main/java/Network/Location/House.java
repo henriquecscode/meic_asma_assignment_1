@@ -1,4 +1,4 @@
-package World.Location;
+package Network.Location;
 
 public class House extends Location{
     public House(String name){

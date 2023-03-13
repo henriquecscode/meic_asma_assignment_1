@@ -30,4 +30,11 @@ public class RegionHub extends Hub {
         super.addVehicle(van);
     }
 
+    public List<Semi> getSemis() {
+        return semis;
+    }
+
+    public List<Van> getVans() {
+        return vans;
+    }
 }

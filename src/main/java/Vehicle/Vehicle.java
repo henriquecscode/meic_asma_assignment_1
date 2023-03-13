@@ -5,11 +5,13 @@ import Network.Location.Location;
 import Vehicle.Seed.VehicleSeed;
 import Vehicle.States.State;
 import Vehicle.States.Idle;
+import Company.Hub;
 
 public class Vehicle {
 
     public VehicleSeed seed;
     public Company company;
+    private Hub hub = null;
     private int cargo;
     private int speed;
     private int costPerMile;
@@ -45,6 +47,14 @@ public class Vehicle {
 
     public State getState() {
         return state;
+    }
+
+    public void setHub(Hub hub) {
+        this.hub = hub;
+    }
+
+    public Hub getHub() {
+        return hub;
     }
 }
 

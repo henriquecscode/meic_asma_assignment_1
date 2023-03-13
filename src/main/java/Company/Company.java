@@ -24,6 +24,7 @@ public class Company {
     private FleetSeed fleetSeed;
     private List<Hub> hubs = new ArrayList<>();
     private List<GlobalHub> globalHubs = new ArrayList<>();
+    private HashMap<Integer, GlobalHub> globalHubsByLocation = new HashMap<>();
     private List<RegionHub> regionHubs = new ArrayList<>();
     private HashMap<List<Integer>, RegionHub> regionHubsByLocation = new HashMap<>();
     private CompanyTypeVehicles ships;
@@ -45,8 +46,10 @@ public class Company {
         for (Integer globalHubIndex : seedGlobalHubs) {
             Port port = network.getPorts().get(globalHubIndex);
             GlobalHub globalHub = new GlobalHub(this, port);
+            port.addHub(globalHub);
             this.hubs.add(globalHub);
             this.globalHubs.add(globalHub);
+            this.globalHubsByLocation.put(globalHubIndex, globalHub);
         }
 
         List<List<Integer>> seedRegionHubs = companySeed.getRegionalHubs();
@@ -55,6 +58,7 @@ public class Company {
             int hubCity = regionHubIndex.get(1);
             City city = network.getCitiesByLocation().get(hubPort).get(hubCity);
             RegionHub regionHub = new RegionHub(this, city);
+            city.addHub(regionHub);
             this.hubs.add(regionHub);
             this.regionHubs.add(regionHub);
             this.regionHubsByLocation.put(List.of(hubPort, hubCity), regionHub);
@@ -66,18 +70,27 @@ public class Company {
         List<Ship> ships = new ArrayList<>();
         List<Integer> shipsLocations = companySeed.getShipLocations();
         for (int i = 0; i < shipsLocations.size(); i++) {
-            Port shipLocation = network.getPorts().get(shipsLocations.get(i));
+            int portIndex = shipsLocations.get(i);
+            Port shipLocation = network.getPorts().get(portIndex);
             Ship ship = new Ship(this, shipLocation, fleetSeed.getShipSeed());
             ships.add(ship);
+            Hub hub = globalHubsByLocation.get(portIndex);
+            hub.addVehicle(ship);
+            ship.setHub(hub);
+
         }
         this.ships = new CompanyTypeVehicles(ships);
 
         List<Semi> semis = new ArrayList<Semi>();
         List<Integer> semiInGlobalLocations = companySeed.getGlobalSemiLocations();
         for (int i = 0; i < semiInGlobalLocations.size(); i++) {
-            Port port = network.getPorts().get(shipsLocations.get(i));
+            int portIndex = semiInGlobalLocations.get(i);
+            Port port = network.getPorts().get(portIndex);
             Vehicle semi = new Semi(this, port, fleetSeed.getSemiSeed());
             semis.add((Semi) semi);
+            Hub hub = globalHubsByLocation.get(portIndex);
+            hub.addVehicle(semi);
+            semi.setHub(hub);
         }
 
         List<List<Integer>> semiInRegionalLocations = companySeed.getRegionalSemiLocations();
@@ -87,6 +100,9 @@ public class Company {
             City cityLocation = network.getCitiesByLocation().get(port).get(city);
             Vehicle semi = new Semi(this, cityLocation, fleetSeed.getSemiSeed());
             semis.add((Semi) semi);
+            Hub hub = regionHubsByLocation.get(List.of(port, city));
+            hub.addVehicle(semi);
+            semi.setHub(hub);
         }
         this.semis = new CompanyTypeVehicles(semis);
 
@@ -98,6 +114,9 @@ public class Company {
             City cityLocation = network.getCitiesByLocation().get(port).get(city);
             Vehicle van = new Van(this, cityLocation, fleetSeed.getVanSeed());
             vans.add((Van) van);
+            Hub hub = regionHubsByLocation.get(List.of(port, city));
+            hub.addVehicle(van);
+            van.setHub(hub);
         }
         this.vans = new CompanyTypeVehicles(vans);
     }

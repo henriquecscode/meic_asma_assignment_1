@@ -29,4 +29,12 @@ public class GlobalHub extends Hub {
         semis.add(semi);
         super.addVehicle(semi);
     }
+
+    public List<Ship> getShips() {
+        return ships;
+    }
+
+    public List<Semi> getSemis() {
+        return semis;
+    }
 }

@@ -2,6 +2,7 @@ package Network;
 
 import Network.Location.City;
 import Network.Location.House;
+import Network.Location.Location;
 import Network.Location.Port;
 import Network.Route.InternationalRoute;
 import Network.Route.NeighbourhoodRoute;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Network {
+    public NetworkSeed seed;
     private List<House> houses = new ArrayList<>();
     private List<List<List<House>>> housesByLocation = new ArrayList<>();
     private List<City> cities = new ArrayList<>();
@@ -23,6 +25,7 @@ public class Network {
 
 
     public Network(NetworkSeed seed) {
+        this.seed = seed;
         this.makePorts(seed);
         this.makeCities(seed);
         this.makeHouses(seed);
@@ -43,7 +46,7 @@ public class Network {
                 int distance = seed.getPortDistances().get(distanceCount);
                 InternationalRoute route = new InternationalRoute(from, to, distance);
                 this.internationalRoutes.add(route);
-            distanceCount++;
+                distanceCount++;
             }
         }
     }
@@ -118,4 +121,47 @@ public class Network {
         }
     }
 
+    public Location get(int index) {
+        return this.ports.get(index);
+    }
+
+    public Location get(int portIndex, int cityIndex) {
+        return this.citiesByLocation.get(portIndex).get(cityIndex);
+    }
+
+    public Location get(int portIndex, int cityIndex, int houseIndex) {
+        return this.housesByLocation.get(portIndex).get(cityIndex).get(houseIndex);
+    }
+
+    public List<House> getHouses() {
+        return houses;
+    }
+
+    public List<List<List<House>>> getHousesByLocation() {
+        return housesByLocation;
+    }
+
+    public List<City> getCities() {
+        return cities;
+    }
+
+    public List<List<City>> getCitiesByLocation() {
+        return citiesByLocation;
+    }
+
+    public List<Port> getPorts() {
+        return ports;
+    }
+
+    public List<InternationalRoute> getInternationalRoutes() {
+        return internationalRoutes;
+    }
+
+    public List<List<RegionalRoute>> getRegionalRoutes() {
+        return regionalRoutes;
+    }
+
+    public List<List<List<NeighbourhoodRoute>>> getNeighbourhoodRoutes() {
+        return neighbourhoodRoutes;
+    }
 }

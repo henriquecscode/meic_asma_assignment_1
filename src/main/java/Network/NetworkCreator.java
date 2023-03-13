@@ -1,11 +1,16 @@
 package Network;
 
+import utils.CreatorInterface;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 // A class to set the properties of the world
-public class NetworkCreator {
+public class NetworkCreator implements CreatorInterface {
+    private final int NO_PORTS = 3;
+    private final int NO_CITIES = 5;
+    private final int NO_HOUSES = 10;
     private final int MEAN_PORTS = 50;
     private final int MEAN_CITIES = 15;
     private final int MEAN_HOUSES = 6;
@@ -13,19 +18,21 @@ public class NetworkCreator {
     private final double STD_CITIES = 5;
     private final double STD_HOUSES = 1.2;
 
-    private NetworkSeed seed;
 
     public NetworkCreator() {
-        int noPorts = 3;
-        int noCities = 5;
-        int noHouses = 10;
+    }
+
+    public NetworkSeed getSeed() {
+        int noPorts = NO_PORTS;
+        int noCities = NO_CITIES;
+        int noHouses = NO_HOUSES;
 
         List<Integer> portDistances = new ArrayList<>();
         List<List<Integer>> cityDistances = new ArrayList<>();
         List<List<List<Integer>>> houseDistances = new ArrayList<>();
-        DistanceCreator portDistanceGenerator = new DistanceCreator( this.MEAN_PORTS, this.STD_PORTS);
-        DistanceCreator cityDistanceGenerator = new DistanceCreator( this.MEAN_CITIES, this.STD_CITIES);
-        DistanceCreator houseDistanceGenerator = new DistanceCreator( this.MEAN_HOUSES, this.STD_HOUSES);
+        DistanceCreator portDistanceGenerator = new DistanceCreator(this.MEAN_PORTS, this.STD_PORTS);
+        DistanceCreator cityDistanceGenerator = new DistanceCreator(this.MEAN_CITIES, this.STD_CITIES);
+        DistanceCreator houseDistanceGenerator = new DistanceCreator(this.MEAN_HOUSES, this.STD_HOUSES);
 
         for (int i = 0; i < noPorts; i++) {
             int distance = portDistanceGenerator.getDistance();
@@ -51,15 +58,7 @@ public class NetworkCreator {
             }
             houseDistances.add(perPortDistance);
         }
-        this.seed = new NetworkSeed(noPorts, noCities, noHouses, portDistances, cityDistances, houseDistances);
-        this.seed.saveSeed();
-    }
-
-    public NetworkCreator(String filename) {
-        this.seed = new NetworkSeed(filename);
-    }
-
-    public NetworkSeed getSeed() {
+        NetworkSeed seed = new NetworkSeed(noPorts, noCities, noHouses, portDistances, cityDistances, houseDistances);
         return seed;
     }
 
@@ -75,9 +74,11 @@ class DistanceCreator {
         this.mean = mean;
         this.standardDeviation = standardDeviation;
     }
+
     public DistanceCreator(int mean) {
         this(mean, 0);
     }
+
     public DistanceCreator() {
         this(0, 1);
     }

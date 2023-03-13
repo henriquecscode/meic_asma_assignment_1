@@ -1,5 +1,8 @@
 package Network;
 
+import utils.ClassSeed;
+import utils.SeedInterface;
+
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,16 +11,23 @@ import java.util.List;
 import java.util.Scanner;
 
 
-public class NetworkSeed {
-    static final String PATH = "data/seeds/";
+public class NetworkSeed extends ClassSeed implements SeedInterface {
+    static final String PATH = "data/network_seeds/";
     private int numberOfPorts;
     private int numberOfCities;
     private int numberOfHouses;
-    private List<Integer> portDistances = new ArrayList<>();
-    private List<List<Integer>> cityDistances = new ArrayList<>();
-    private List<List<List<Integer>>> houseDistances = new ArrayList<>();
+    private List<Integer> portDistances;
+    private List<List<Integer>> cityDistances;
+    private List<List<List<Integer>>> houseDistances;
+
+    public void init() {
+        portDistances = new ArrayList<>();
+        cityDistances = new ArrayList<>();
+        houseDistances = new ArrayList<>();
+    }
 
     public NetworkSeed(int numberOfPorts, int numberOfCities, int numberOfHouses, List<Integer> portDistances, List<List<Integer>> cityDistances, List<List<List<Integer>>> houseDistances) {
+        super();
         this.numberOfPorts = numberOfPorts;
         this.numberOfCities = numberOfCities;
         this.numberOfHouses = numberOfHouses;
@@ -27,14 +37,7 @@ public class NetworkSeed {
     }
 
     public NetworkSeed(String filename) {
-        File seed = new File(PATH + filename + ".txt");
-        Scanner scanner;
-        try {
-            scanner = new Scanner(seed).useDelimiter("( |\n)+");
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        this.scanSeed(scanner);
+        super(filename);
     }
 
     public void scanSeed(Scanner scanner) {
@@ -64,31 +67,11 @@ public class NetworkSeed {
         }
     }
 
-    public void saveSeed() {
-        String filename = NetworkSeed.getDate() + "_seed";
-        this.saveSeed(filename);
+    public String getPath() {
+        return PATH;
     }
-
-    public void saveSeed(String filename) {
-        String filepath = NetworkSeed.PATH + filename + ".txt";
-        PrintWriter writer;
-        File file = new File(filepath);
-        try {
-            file.createNewFile();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            writer = new PrintWriter(file);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        writer.print(this);
-        writer.close();
-    }
-
     @Override
-    public String toString() {
+    public String serialize() {
         String text = this.numberOfPorts + " " + this.numberOfCities + " " + this.numberOfHouses + "\n";
         for (int i = 0; i < this.numberOfPorts; i++) {
             text += this.portDistances.get(i) + " ";
@@ -134,9 +117,4 @@ public class NetworkSeed {
         return houseDistances;
     }
 
-    static String getDate() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-        Date date = new Date();
-        return formatter.format(date);
-    }
 }

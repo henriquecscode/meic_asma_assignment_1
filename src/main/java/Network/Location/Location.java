@@ -1,5 +1,6 @@
 package Network.Location;
 
+import Company.Hub;
 import Network.Graph.Node;
 import Network.Route.Route;
 
@@ -10,6 +11,7 @@ public class Location extends Node {
     private final String name;
     private final int level;
 
+    private List<Hub> hubs = new ArrayList<>();
     //    Nodes of a higher of equal level
     private List<Location> upperLocations = new ArrayList<>();
     private List<Route> upperRoutes = new ArrayList<>();
@@ -65,5 +67,17 @@ public class Location extends Node {
                 this.lowerRoutes.add(route);
             }
         }
+    }
+
+    public List<Hub> getHubs() {
+        return hubs;
+    }
+
+    public void addHub(Hub hub) {
+        this.hubs.add(hub);
+    }
+
+    public boolean removeHub(Hub hub) {
+        return this.hubs.remove(hub);
     }
 }

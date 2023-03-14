@@ -2,7 +2,7 @@ package Vehicle.States;
 
 import Network.Location.Location;
 import Network.Route.Route;
-import Producer.Product;
+import Product.Product;
 import Vehicle.Vehicle;
 
 import java.util.List;

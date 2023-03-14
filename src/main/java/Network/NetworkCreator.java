@@ -8,31 +8,51 @@ import java.util.Random;
 
 // A class to set the properties of the world
 public class NetworkCreator implements CreatorInterface {
-    private final int NO_PORTS = 3;
-    private final int NO_CITIES = 5;
-    private final int NO_HOUSES = 10;
-    private final int MEAN_PORTS = 50;
-    private final int MEAN_CITIES = 15;
-    private final int MEAN_HOUSES = 6;
-    private final double STD_PORTS = 10;
-    private final double STD_CITIES = 5;
-    private final double STD_HOUSES = 1.2;
+    private static int NO_PORTS = 3;
+    private static int NO_CITIES = 5;
+    private static int NO_HOUSES = 10;
+    private static int MEAN_PORTS = 50;
+    private static int MEAN_CITIES = 15;
+    private static int MEAN_HOUSES = 6;
+    private static double STD_PORTS = 10;
+    private static double STD_CITIES = 5;
+    private static double STD_HOUSES = 1.2;
+
+    private final int noPorts;
+    private final int noCities;
+    private final int noHouses;
+    private final int meanPorts;
+    private final int meanCities;
+    private final int meanHouses;
+    private final double stdPorts;
+    private final double stdCities;
+    private final double stdHouses;
 
 
     public NetworkCreator() {
+        this(NO_PORTS, NO_CITIES, NO_HOUSES, MEAN_PORTS, MEAN_CITIES, MEAN_HOUSES, STD_PORTS, STD_CITIES, STD_HOUSES);
+    }
+
+    public NetworkCreator(int noPorts, int noCities, int noHouses, int meanPorts, int meanCities, int meanHouses, double stdPorts, double stdCities, double stdHouses) {
+        this.noPorts = noPorts;
+        this.noCities = noCities;
+        this.noHouses = noHouses;
+        this.meanPorts = meanPorts;
+        this.meanCities = meanCities;
+        this.meanHouses = meanHouses;
+        this.stdPorts = stdPorts;
+        this.stdCities = stdCities;
+        this.stdHouses = stdHouses;
     }
 
     public NetworkSeed getSeed() {
-        int noPorts = NO_PORTS;
-        int noCities = NO_CITIES;
-        int noHouses = NO_HOUSES;
 
         List<Integer> portDistances = new ArrayList<>();
         List<List<Integer>> cityDistances = new ArrayList<>();
         List<List<List<Integer>>> houseDistances = new ArrayList<>();
-        DistanceCreator portDistanceGenerator = new DistanceCreator(this.MEAN_PORTS, this.STD_PORTS);
-        DistanceCreator cityDistanceGenerator = new DistanceCreator(this.MEAN_CITIES, this.STD_CITIES);
-        DistanceCreator houseDistanceGenerator = new DistanceCreator(this.MEAN_HOUSES, this.STD_HOUSES);
+        DistanceCreator portDistanceGenerator = new DistanceCreator(meanPorts, stdPorts);
+        DistanceCreator cityDistanceGenerator = new DistanceCreator(meanCities, stdCities);
+        DistanceCreator houseDistanceGenerator = new DistanceCreator(meanCities, stdHouses);
 
         for (int i = 0; i < noPorts; i++) {
             int distance = portDistanceGenerator.getDistance();
@@ -67,10 +87,9 @@ public class NetworkCreator implements CreatorInterface {
 class DistanceCreator {
     private int mean;
     private double standardDeviation;
-    private Random random;
+    private final static Random random = new Random();
 
     public DistanceCreator(int mean, double standardDeviation) {
-        this.random = new Random();
         this.mean = mean;
         this.standardDeviation = standardDeviation;
     }

@@ -1,6 +1,6 @@
 package Vehicle.States;
 
-import Producer.Product;
+import Product.Product;
 import Vehicle.Vehicle;
 
 import java.util.ArrayList;

@@ -6,35 +6,49 @@ import Company.CompanySeed;
 import Network.NetworkCreator;
 import Network.NetworkSeed;
 import Network.Network;
+import Producer.Producer;
+import Producer.ProducerCreator;
+import Producer.ProducerSeed;
+import Product.ProductCreator;
 import Vehicle.Seed.*;
-import Vehicle.Vehicle;
 import utils.ClassSeed;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class World {
+    private final static int NUMBER_OF_COMPANIES = 10;
+    private final static int NUMBER_OF_PRODUCERS = 30;
     private Network network;
+    private NetworkSeed networkSeed;
     private FleetSeed fleetSeed;
     private List<Company> companies;
+    private int numberOfCompanies;
+    private int numberOfProducers;
+    private ArrayList<Object> producers;
 
     public World() {
+        this.numberOfCompanies = NUMBER_OF_COMPANIES;
+        this.numberOfProducers = NUMBER_OF_PRODUCERS;
+        
         this.makeNetwork();
         this.makeFleet();
         this.makeCompanies();
+        this.makeProducers();
     }
 
-    public World(String networkSeedFilename, String fleetSeedFilename, List<String> companySeedFilenames) {
+    public World(String networkSeedFilename, String fleetSeedFilename, List<String> companySeedFilenames, List<String> producerSeedFilenames) {
         this.makeNetwork(networkSeedFilename);
         this.makeFleet(fleetSeedFilename);
         this.makeCompanies(companySeedFilenames);
+        this.makeProducers(producerSeedFilenames);
     }
 
     public void makeNetwork() {
         NetworkCreator networkCreator = new NetworkCreator();
-        NetworkSeed seed = networkCreator.getSeed();
-        seed.saveSeed();
-        this.network = new Network(seed);
+        networkSeed = networkCreator.getSeed();
+        this.networkSeed.saveSeed();
+        this.network = new Network(this.networkSeed);
     }
 
     public void makeNetwork(String networkSeedFilename) {
@@ -59,14 +73,9 @@ public class World {
     }
 
     public void makeCompanies() {
-        this.makeCompanies(10);
+        this.makeCompanies(numberOfCompanies);
     }
 
-    public void makeCompanies(List<String> companySeedFilenames) {
-        for (String companySeedFilename : companySeedFilenames) {
-            this.makeCompany(companySeedFilename);
-        }
-    }
 
     public void makeCompanies(int numberOfCompanies) {
         companies = new ArrayList<>();
@@ -79,12 +88,46 @@ public class World {
         }
     }
 
+    public void makeCompanies(List<String> companySeedFilenames) {
+        this.companies = new ArrayList<>();
+        for (String companySeedFilename : companySeedFilenames) {
+            this.makeCompany(companySeedFilename);
+        }
+    }
 
     public void makeCompany(String companySeedFilename) {
         CompanySeed companySeed = new CompanySeed(companySeedFilename);
-        this.companies = new ArrayList<>();
         this.companies.add(new Company(this.network, companySeed, fleetSeed));
     }
+
+    public void makeProducers() {
+        this.makeProducers(numberOfProducers);
+    }
+
+    public void makeProducers(int numberOfProducers) {
+        producers = new ArrayList<>();
+        ProductCreator productCreator = new ProductCreator();
+        String standardFilename = ClassSeed.getStandardFilename();
+        ProducerCreator producerCreator = new ProducerCreator(networkSeed, productCreator);
+        for (int i = 0; i < numberOfProducers; i++) {
+            ProducerSeed producerSeed = producerCreator.getSeed();
+            producerSeed.saveSeed(standardFilename + "_" + i);
+            producers.add(new Producer(this.network, producerSeed));
+        }
+    }
+
+    public void makeProducers(List<String> producerSeedFilenames) {
+        this.producers = new ArrayList<>();
+        for (String producerSeedFilename : producerSeedFilenames) {
+            this.makeProducer(producerSeedFilename);
+        }
+    }
+
+    public void makeProducer(String producerSeedFilename) {
+        ProducerSeed producerSeed = new ProducerSeed(producerSeedFilename);
+        this.producers.add(new Producer(this.network, producerSeed));
+    }
+
 
 }
 

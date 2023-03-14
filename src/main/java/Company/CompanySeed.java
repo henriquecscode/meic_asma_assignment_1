@@ -38,14 +38,7 @@ public class CompanySeed extends ClassSeed implements SeedInterface {
     }
 
     public CompanySeed(String filename) {
-        File seed = new File(PATH + filename + ".txt");
-        Scanner scanner;
-        try {
-            scanner = new Scanner(seed).useDelimiter("( |\n)+");
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        this.scanSeed(scanner);
+        super(filename);
     }
 
     public void init() {

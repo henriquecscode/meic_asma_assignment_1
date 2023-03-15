@@ -3,11 +3,13 @@ package Producer;
 import Network.Location.House;
 import Network.Location.Location;
 import Network.Network;
+import Product.Product;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Producer {
+    public static List<Product> availableProducts = new ArrayList<>();
     private Network network;
     private ProducerSeed seed;
     private House location;
@@ -22,7 +24,9 @@ public class Producer {
 
     private void makeProductions(ProducerSeed seed) {
         for (ProductionSeed productionSeed : seed.getProductionSeeds()) {
-            productions.add(new Production(productionSeed));
+            Production production = new Production(productionSeed);
+            productions.add(production);
+            availableProducts.add(production.getProduct());
         }
     }
 

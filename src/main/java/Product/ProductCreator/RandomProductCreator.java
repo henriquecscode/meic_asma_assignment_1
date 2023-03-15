@@ -1,26 +1,29 @@
-package Product;
+package Product.ProductCreator;
 
+import Producer.ProductionCreator;
+import Product.Catalog;
+import Product.ProductSeed;
 import utils.CreatorInterface;
 
 import java.util.Random;
 
-public class ProductCreator implements CreatorInterface {
+public class RandomProductCreator extends ProductCreator implements CreatorInterface {
     private final static Random random = new Random();
-    private static int MEAN_VOLUME = 0;
-    private static int MEAN_BASE_PRICE = 0;
-    private static double STD_VOLUME = 0;
-    private static double STD_BASE_PRICE = 0;
+    private static int MEAN_VOLUME = 20;
+    private static int MEAN_BASE_PRICE = 10;
+    private static double STD_VOLUME = 5;
+    private static double STD_BASE_PRICE = 1.3;
     private final int meanVolume;
     private final int meanBasePrice;
     private final double stdVolume;
     private final double stdBasePrice;
 
 
-    public ProductCreator() {
+    public RandomProductCreator() {
         this(MEAN_VOLUME, MEAN_BASE_PRICE, STD_VOLUME, STD_BASE_PRICE);
     }
 
-    public ProductCreator(int meanVolume, int meanBasePrice, double stdVolume, double stdBasePrice) {
+    public RandomProductCreator(int meanVolume, int meanBasePrice, double stdVolume, double stdBasePrice) {
         this.meanVolume = meanVolume;
         this.meanBasePrice = meanBasePrice;
         this.stdVolume = stdVolume;
@@ -30,7 +33,7 @@ public class ProductCreator implements CreatorInterface {
     public ProductSeed getSeed() {
         int volume = getRandomMetric(meanVolume, stdVolume);
         int basePrice = getRandomMetric(meanBasePrice, stdBasePrice);
-        return new ProductSeed("productName", volume, basePrice);
+        return Catalog.getProductSeed(volume, basePrice);
     }
 
     private int getRandomMetric(int mean, double std) {

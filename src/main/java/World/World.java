@@ -9,7 +9,8 @@ import Network.Network;
 import Producer.Producer;
 import Producer.ProducerCreator;
 import Producer.ProducerSeed;
-import Product.ProductCreator;
+import Product.ProductCreator.ProductCreator;
+import Product.ProductCreator.RandomProductCreator;
 import Vehicle.Seed.*;
 import utils.ClassSeed;
 
@@ -18,7 +19,7 @@ import java.util.List;
 
 public class World {
     private final static int NUMBER_OF_COMPANIES = 10;
-    private final static int NUMBER_OF_PRODUCERS = 30;
+    private final static int NUMBER_OF_PRODUCERS = 20;
     private Network network;
     private NetworkSeed networkSeed;
     private FleetSeed fleetSeed;
@@ -30,7 +31,7 @@ public class World {
     public World() {
         this.numberOfCompanies = NUMBER_OF_COMPANIES;
         this.numberOfProducers = NUMBER_OF_PRODUCERS;
-        
+
         this.makeNetwork();
         this.makeFleet();
         this.makeCompanies();
@@ -106,7 +107,7 @@ public class World {
 
     public void makeProducers(int numberOfProducers) {
         producers = new ArrayList<>();
-        ProductCreator productCreator = new ProductCreator();
+        ProductCreator productCreator = new RandomProductCreator();
         String standardFilename = ClassSeed.getStandardFilename();
         ProducerCreator producerCreator = new ProducerCreator(networkSeed, productCreator);
         for (int i = 0; i < numberOfProducers; i++) {

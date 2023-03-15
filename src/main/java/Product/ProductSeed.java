@@ -7,7 +7,6 @@ import java.util.Scanner;
 
 public class ProductSeed extends ClassSeed implements SeedInterface {
     private static final String PATH = "data/product_seeds/";
-    private String name;
     private int volume;
     private int basePrice;
 
@@ -15,10 +14,9 @@ public class ProductSeed extends ClassSeed implements SeedInterface {
         super();
     }
 
-    public ProductSeed(String name, int volumne, int basePrice) {
+    public ProductSeed(int volume, int basePrice) {
         super();
-        this.name = name;
-        this.volume = volumne;
+        this.volume = volume;
         this.basePrice = basePrice;
     }
 
@@ -33,7 +31,6 @@ public class ProductSeed extends ClassSeed implements SeedInterface {
 
     @Override
     public void scanSeed(Scanner scanner) {
-        this.name = scanner.next();
         this.volume = scanner.nextInt();
         this.basePrice = scanner.nextInt();
     }
@@ -45,11 +42,7 @@ public class ProductSeed extends ClassSeed implements SeedInterface {
 
     @Override
     public String serialize() {
-        return this.name + " " + this.volume + " " + this.basePrice;
-    }
-
-    public String getName() {
-        return name;
+        return this.volume + " " + this.basePrice;
     }
 
     public int getVolume() {

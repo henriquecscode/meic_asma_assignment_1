@@ -1,13 +1,14 @@
 package Producer;
 
 import Product.Product;
+import Product.Catalog;
 
 public class Production {
     private final Product product;
     private final double priceMult;
 
     public Production(ProductionSeed seed) {
-        this.product = new Product(seed.getProductSeed());
+        this.product = Catalog.getProduct(seed.getProductSeed());
         this.priceMult = seed.getPriceMult();
     }
 

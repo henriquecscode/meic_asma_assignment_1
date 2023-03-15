@@ -1,8 +1,7 @@
 package Producer;
 
 import Network.NetworkSeed;
-import Product.ProductCreator;
-import utils.ClassSeed;
+import Product.ProductCreator.ProductCreator;
 import utils.CreatorInterface;
 
 import java.util.ArrayList;
@@ -32,7 +31,7 @@ public class ProducerCreator implements CreatorInterface {
         ProductionCreator productionCreator = new ProductionCreator(productCreator);
         List<ProductionSeed> productions = new ArrayList<>();
         for (int i = 0; i < numberOfProductions; i++) {
-            productions.add((ProductionSeed) productionCreator.getSeed());
+            productions.add(productionCreator.getSeed());
         }
         int port, city, house;
         port = random.nextInt(seed.getNumberOfPorts());

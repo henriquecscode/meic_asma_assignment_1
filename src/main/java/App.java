@@ -26,10 +26,7 @@ public class App {
     public static void main(String[] args) throws Exception {
         init();
         World world = new World("2023_03_17_09_13_28_seed");
-
-//        World world2 = new World("2023_03_15_19_50_03_seed", "2023_03_15_19_50_03_seed",
-//                IntStream.range(0, 10).mapToObj(i -> "2023_03_15_19_50_03_seed" + "_" + i).collect(Collectors.toList()),
-//                IntStream.range(0, 20).mapToObj(i -> "2023_03_15_19_50_03_seed" + "_" + i).collect(Collectors.toList()));
+        world.run();
         System.out.println("Hello, World!");
     }
 

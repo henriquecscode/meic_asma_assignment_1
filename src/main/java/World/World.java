@@ -174,6 +174,14 @@ public class World {
         this.producers.add(new Producer(this.network, producerSeed));
     }
 
+    public void run() {
+        for (Producer producer : producers) {
+            createProducerAgent(producer);
+        }
+    }
 
+    public void createProducerAgent(Producer producer) {
+        //TODO
+    }
 }
 

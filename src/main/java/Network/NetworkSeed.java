@@ -26,6 +26,10 @@ public class NetworkSeed extends ClassSeed implements SeedInterface {
         houseDistances = new ArrayList<>();
     }
 
+    public NetworkSeed() {
+        super();
+    }
+
     public NetworkSeed(int numberOfPorts, int numberOfCities, int numberOfHouses, List<Integer> portDistances, List<List<Integer>> cityDistances, List<List<List<Integer>>> houseDistances) {
         super();
         this.numberOfPorts = numberOfPorts;
@@ -70,6 +74,7 @@ public class NetworkSeed extends ClassSeed implements SeedInterface {
     public String getPath() {
         return PATH;
     }
+
     @Override
     public String serialize() {
         String text = this.numberOfPorts + " " + this.numberOfCities + " " + this.numberOfHouses + "\n";

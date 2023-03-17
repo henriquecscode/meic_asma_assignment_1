@@ -13,6 +13,10 @@ public class ProducerSeed extends ClassSeed implements SeedInterface {
     private List<ProductionSeed> productionSeeds;
     private List<Integer> location; // [port, city, house]
 
+    public ProducerSeed() {
+        super();
+    }
+
     public ProducerSeed(String filename) {
         super(filename);
     }

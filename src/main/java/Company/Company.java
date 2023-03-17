@@ -120,6 +120,10 @@ public class Company {
         }
         this.vans = new CompanyTypeVehicles(vans);
     }
+
+    public CompanySeed getSeed() {
+        return companySeed;
+    }
 }
 
 class CompanyTypeVehicles<V extends Vehicle> {

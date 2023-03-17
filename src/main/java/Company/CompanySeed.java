@@ -21,6 +21,10 @@ public class CompanySeed extends ClassSeed implements SeedInterface {
     private List<Integer> shipLocations, globalSemiLocations;
     private List<List<Integer>> regionalSemiLocations, vanLocations; // List<<Integer,Integer>>
 
+    public CompanySeed() {
+        super();
+    }
+
     public CompanySeed(int numberOfGlobal, int numberOfRegional, int numberOfShips, int numberOfSemisInGlobal, int numberOfSemisInRegional, int numberOfVans, List<Integer> globalHubs, List<List<Integer>> regionalHubs, List<Integer> shipLocations, List<Integer> globalSemiLocations, List<List<Integer>> regionalSemiLocations, List<List<Integer>> vanLocations) {
         super();
         this.numberOfGlobal = numberOfGlobal;

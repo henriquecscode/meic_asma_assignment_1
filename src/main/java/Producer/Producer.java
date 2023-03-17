@@ -37,4 +37,8 @@ public class Producer {
         int houseIndex = locationIndexes.get(2);
         location = network.getHousesByLocation().get(portIndex).get(cityIndex).get(houseIndex);
     }
+
+    public ProducerSeed getSeed() {
+        return seed;
+    }
 }

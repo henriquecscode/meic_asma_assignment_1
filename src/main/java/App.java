@@ -14,7 +14,8 @@ public class App {
             "network_seeds",
             "producer_seeds",
             "product_seeds",
-            "vehicle_seeds"
+            "vehicle_seeds",
+            "world_seeds"
     );
 
     private final static List<String> DATA_FILES = List.of(
@@ -24,7 +25,7 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         init();
-        World world = new World();
+        World world = new World("2023_03_17_09_13_28_seed");
 
 //        World world2 = new World("2023_03_15_19_50_03_seed", "2023_03_15_19_50_03_seed",
 //                IntStream.range(0, 10).mapToObj(i -> "2023_03_15_19_50_03_seed" + "_" + i).collect(Collectors.toList()),

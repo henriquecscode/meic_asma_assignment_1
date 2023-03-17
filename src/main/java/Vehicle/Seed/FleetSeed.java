@@ -9,6 +9,10 @@ public class FleetSeed extends ClassSeed implements SeedInterface {
     private static final String PATH = "data/fleet_seeds/";
     private VehicleSeed shipSeed, semiSeed, vanSeed;
 
+    public FleetSeed() {
+        super();
+    }
+
     public FleetSeed(String filename) {
         super(filename);
     }

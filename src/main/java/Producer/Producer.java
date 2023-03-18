@@ -41,4 +41,12 @@ public class Producer {
     public ProducerSeed getSeed() {
         return seed;
     }
+
+    public List<Production> getProductions() {
+        return productions;
+    }
+
+    public House getLocation() {
+        return location;
+    }
 }

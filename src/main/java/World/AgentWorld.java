@@ -38,10 +38,12 @@ public class AgentWorld extends World {
 
     private void makeProducers() throws StaleProxyException {
         int producerIndex = 0;
+        AgentController ac;
         String name;
         for (Producer producer : producers) {
             name = "Producer" + String.format("%02d", producerIndex);
-            container.acceptNewAgent(name, new ProducerAgent(producer));
+            ac = container.acceptNewAgent(name, new ProducerAgent(producer));
+            ac.start();
             producerIndex++;
         }
     }

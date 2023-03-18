@@ -19,16 +19,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class World {
-    private final static int NUMBER_OF_COMPANIES = 10;
-    private final static int NUMBER_OF_PRODUCERS = 20;
-    private WorldSeed worldSeed;
-    private Network network;
-    private NetworkSeed networkSeed;
-    private FleetSeed fleetSeed;
-    private List<Company> companies = new ArrayList<>();
-    private int numberOfCompanies;
-    private int numberOfProducers;
-    private ArrayList<Producer> producers = new ArrayList<>();
+    protected final static int NUMBER_OF_COMPANIES = 10;
+    protected final static int NUMBER_OF_PRODUCERS = 20;
+    protected WorldSeed worldSeed;
+    protected Network network;
+    protected NetworkSeed networkSeed;
+    protected FleetSeed fleetSeed;
+    protected List<Company> companies = new ArrayList<>();
+    protected int numberOfCompanies;
+    protected int numberOfProducers;
+    protected ArrayList<Producer> producers = new ArrayList<>();
 
     public World() {
         this.numberOfCompanies = NUMBER_OF_COMPANIES;
@@ -66,23 +66,23 @@ public class World {
     }
 
 
-    public void makeNetwork() {
+    private void makeNetwork() {
         NetworkCreator networkCreator = new NetworkCreator();
         networkSeed = networkCreator.getSeed();
         this.networkSeed.saveSeed();
         this.network = new Network(this.networkSeed);
     }
 
-    public void makeNetwork(String networkSeedFilename) {
+    private void makeNetwork(String networkSeedFilename) {
         NetworkSeed seed = new NetworkSeed(networkSeedFilename);
         makeNetwork(seed);
     }
 
-    public void makeNetwork(NetworkSeed networkSeed) {
+    private void makeNetwork(NetworkSeed networkSeed) {
         this.network = new Network(networkSeed);
     }
 
-    public void makeFleet() {
+    private void makeFleet() {
         ShipCreator shipCreator = new ShipCreator();
         SemiCreator semiCreator = new SemiCreator();
         VanCreator vanCreator = new VanCreator();
@@ -94,16 +94,16 @@ public class World {
         this.fleetSeed.saveSeed();
     }
 
-    public void makeFleet(String fleetSeedFilename) {
+    private void makeFleet(String fleetSeedFilename) {
         this.fleetSeed = new FleetSeed(fleetSeedFilename);
     }
 
-    public void makeCompanies() {
+    private void makeCompanies() {
         this.makeCompanies(numberOfCompanies);
     }
 
 
-    public void makeCompanies(int numberOfCompanies) {
+    private void makeCompanies(int numberOfCompanies) {
         companies = new ArrayList<>();
         CompanyCreator companyCreator = new CompanyCreator(this.network.seed);
         String standardFilename = ClassSeed.getStandardFilename();
@@ -114,7 +114,7 @@ public class World {
         }
     }
 
-    public void makeCompanies(List<String> companySeedFilenames) {
+    private void makeCompanies(List<String> companySeedFilenames) {
         this.companies = new ArrayList<>();
         for (String companySeedFilename : companySeedFilenames) {
             this.makeCompany(companySeedFilename);
@@ -127,20 +127,20 @@ public class World {
         }
     }
 
-    public void makeCompany(String companySeedFilename) {
+    private void makeCompany(String companySeedFilename) {
         CompanySeed companySeed = new CompanySeed(companySeedFilename);
         this.makeCompany(companySeed);
     }
 
-    public void makeCompany(CompanySeed companySeed) {
+    private void makeCompany(CompanySeed companySeed) {
         this.companies.add(new Company(this.network, companySeed, fleetSeed));
     }
 
-    public void makeProducers() {
+    private void makeProducers() {
         this.makeProducers(numberOfProducers);
     }
 
-    public void makeProducers(int numberOfProducers) {
+    private void makeProducers(int numberOfProducers) {
         producers = new ArrayList<>();
         ProductCreator productCreator = new RandomProductCreator();
         String standardFilename = ClassSeed.getStandardFilename();
@@ -152,7 +152,7 @@ public class World {
         }
     }
 
-    public void makeProducers(List<String> producerSeedFilenames) {
+    private void makeProducers(List<String> producerSeedFilenames) {
         this.producers = new ArrayList<>();
         for (String producerSeedFilename : producerSeedFilenames) {
             this.makeProducer(producerSeedFilename);
@@ -165,23 +165,15 @@ public class World {
         }
     }
 
-    public void makeProducer(String producerSeedFilename) {
+    private void makeProducer(String producerSeedFilename) {
         ProducerSeed producerSeed = new ProducerSeed(producerSeedFilename);
         makeProducer(producerSeed);
     }
 
-    public void makeProducer(ProducerSeed producerSeed) {
+    private void makeProducer(ProducerSeed producerSeed) {
         this.producers.add(new Producer(this.network, producerSeed));
     }
 
-    public void run() {
-        for (Producer producer : producers) {
-            createProducerAgent(producer);
-        }
-    }
 
-    public void createProducerAgent(Producer producer) {
-        //TODO
-    }
 }
 

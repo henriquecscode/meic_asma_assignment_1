@@ -21,7 +21,7 @@ public abstract class ClassSeed implements SeedInterface {
         File seed = new File(getPath() + filename + ".txt");
         Scanner scanner;
         try {
-            scanner = new Scanner(seed).useDelimiter("([ \n])+");
+            scanner = new Scanner(seed).useDelimiter("([ \n\r])+");
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }

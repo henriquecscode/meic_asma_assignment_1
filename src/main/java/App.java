@@ -1,10 +1,8 @@
-import World.World;
+import World.AgentWorld;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class App {
     private final static String DATA_FOLDER = "data";
@@ -25,7 +23,7 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         init();
-        World world = new World("2023_03_17_09_13_28_seed");
+        AgentWorld world = new AgentWorld("2023_03_17_09_13_28_seed");
         world.run();
         System.out.println("Hello, World!");
     }

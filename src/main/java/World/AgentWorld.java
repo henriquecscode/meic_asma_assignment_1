@@ -1,6 +1,7 @@
 package World;
 
-import Agents.Producer.ProducerAgent;
+import Agents.ProducerAgent;
+import Client.ClientSpawnerThread;
 import Producer.Producer;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -34,6 +35,8 @@ public class AgentWorld extends World {
         } catch (StaleProxyException e) {
             throw new RuntimeException(e);
         }
+
+        new ClientSpawnerThread(network).start(); // save thread to stop if necessary
     }
 
     private void makeProducers() throws StaleProxyException {

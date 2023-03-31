@@ -1,4 +1,4 @@
-package Agents.Producer;
+package Agents;
 
 
 import Producer.Producer;

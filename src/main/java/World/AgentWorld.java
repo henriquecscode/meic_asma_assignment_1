@@ -1,6 +1,12 @@
 package World;
 
+import Agents.Company.CompanyAgent;
+import Agents.Company.CompanyGlobalHubAgent;
+import Agents.Company.CompanyRegionHubAgent;
 import Agents.Producer.ProducerAgent;
+import Company.GlobalHub;
+import Company.RegionHub;
+import Company.Company;
 import Producer.Producer;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -31,6 +37,7 @@ public class AgentWorld extends World {
 
         try {
             makeProducers();
+            makeCompanies();
         } catch (StaleProxyException e) {
             throw new RuntimeException(e);
         }
@@ -45,6 +52,35 @@ public class AgentWorld extends World {
             ac = container.acceptNewAgent(name, new ProducerAgent(producer));
             ac.start();
             producerIndex++;
+        }
+    }
+
+    private void makeCompanies() throws StaleProxyException {
+        int companyIndex = 0;
+        AgentController ac;
+        String name;
+        for (Company company : companies) {
+            name = "Company" + String.format("%02d", companyIndex);
+            ac = container.acceptNewAgent(name, new CompanyAgent(company));
+            ac.start();
+
+            int hubIndex = 0;
+            for (GlobalHub hub : company.getGlobalHubs()) {
+                name = "Company" + String.format("%02d", companyIndex) + "GlobalHub" + String.format("%02d", hubIndex);
+                ac = container.acceptNewAgent(name, new CompanyGlobalHubAgent(hub));
+                ac.start();
+                hubIndex++;
+            }
+
+            hubIndex = 0;
+            for (RegionHub hub : company.getRegionHubs()) {
+                name = "Company" + String.format("%02d", companyIndex) + "RegionHub" + String.format("%02d", hubIndex);
+                ac = container.acceptNewAgent(name, new CompanyRegionHubAgent(hub));
+                ac.start();
+                hubIndex++;
+            }
+            companyIndex++;
+
         }
     }
 

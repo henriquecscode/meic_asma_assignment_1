@@ -124,6 +124,26 @@ public class Company {
     public CompanySeed getSeed() {
         return companySeed;
     }
+
+    public List<GlobalHub> getGlobalHubs() {
+        return globalHubs;
+    }
+
+    public List<RegionHub> getRegionHubs() {
+        return regionHubs;
+    }
+
+    public CompanyTypeVehicles getShips() {
+        return ships;
+    }
+
+    public CompanyTypeVehicles getSemis() {
+        return semis;
+    }
+
+    public CompanyTypeVehicles getVans() {
+        return vans;
+    }
 }
 
 class CompanyTypeVehicles<V extends Vehicle> {

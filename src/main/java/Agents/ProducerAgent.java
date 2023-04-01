@@ -24,7 +24,7 @@ public class ProducerAgent extends Agent {
         for (Production production : producer.getProductions()) {
             sd = new ServiceDescription();
             sd.setType("producer-" + production.getProduct().getName());
-            sd.setName(getLocalName());
+            sd.setName(production.getProduct().getName());
             dfd.addServices(sd);
         }
         try {

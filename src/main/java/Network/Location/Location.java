@@ -26,6 +26,10 @@ public class Location extends Node {
         this.level = level;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public int getLevel() {
         return level;
     }

@@ -19,7 +19,7 @@ import java.util.List;
 
 public class Company {
 
-    private Network network;
+    public Network network;
     private CompanySeed companySeed;
     private FleetSeed fleetSeed;
     private List<Hub> hubs = new ArrayList<>();

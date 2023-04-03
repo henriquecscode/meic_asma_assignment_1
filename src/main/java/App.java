@@ -3,6 +3,7 @@ import World.AgentWorld;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Scanner;
 
 public class App {
     private final static String DATA_FOLDER = "data";
@@ -26,6 +27,9 @@ public class App {
         AgentWorld world = new AgentWorld("2023_03_17_09_13_28_seed");
         world.run();
         System.out.println("Hello, World!");
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine();
+        world.testProducerAgent();
     }
 
     public static void init() {

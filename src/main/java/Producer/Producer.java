@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Producer {
     public static List<Product> availableProducts = new ArrayList<>();
-    private Network network;
+    public Network network;
     private ProducerSeed seed;
     private House location;
     private List<Production> productions = new ArrayList<>();

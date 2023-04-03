@@ -1,5 +1,6 @@
 package World;
 
+import Agents.ClientAgent;
 import Agents.ProducerAgent;
 import Client.ClientSpawnerThread;
 import Agents.Company.CompanyAgent;
@@ -16,10 +17,14 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AgentWorld extends World {
     private ContainerController container;
+    private List<ClientAgent> clientsAgents = new ArrayList<>();
+    private List<ProducerAgent> producersAgents = new ArrayList<>();
+    private List<CompanyAgent> agentsAgents = new ArrayList<>();
 
     public AgentWorld() {
         super();
@@ -53,8 +58,10 @@ public class AgentWorld extends World {
         String name;
         for (Producer producer : producers) {
             name = "Producer" + String.format("%02d", producerIndex);
-            ac = container.acceptNewAgent(name, new ProducerAgent(producer));
+            ProducerAgent producerAgent = new ProducerAgent(producer);
+            ac = container.acceptNewAgent(name, producerAgent);
             ac.start();
+            producersAgents.add(producerAgent);
             producerIndex++;
         }
     }
@@ -65,8 +72,10 @@ public class AgentWorld extends World {
         String name;
         for (Company company : companies) {
             name = "Company" + String.format("%02d", companyIndex);
-            ac = container.acceptNewAgent(name, new CompanyAgent(company));
+            CompanyAgent companyAgent = new CompanyAgent(company);
+            ac = container.acceptNewAgent(name, companyAgent);
             ac.start();
+            agentsAgents.add(companyAgent);
 
             int hubIndex = 0;
             for (GlobalHub hub : company.getGlobalHubs()) {
@@ -105,6 +114,8 @@ public class AgentWorld extends World {
         }
     }
 
-    public void createProducerAgent(Producer producer) {
+    public void testProducerAgent(){
+        producersAgents.get(0).testProducerRequest();
     }
+
 }

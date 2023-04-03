@@ -10,7 +10,9 @@ import Network.Route.RegionalRoute;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Network {
     public NetworkSeed seed;
@@ -131,6 +133,21 @@ public class Network {
 
     public Location get(int portIndex, int cityIndex, int houseIndex) {
         return this.housesByLocation.get(portIndex).get(cityIndex).get(houseIndex);
+    }
+
+    public Location getLocation(String name){
+        List<Integer> ints = Arrays.stream(name.split("-"))
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
+        if (ints.size() == 1) {
+            return this.get(ints.get(0));
+        } else if (ints.size() == 2) {
+            return this.get(ints.get(0), ints.get(1));
+        } else if (ints.size() == 3) {
+            return this.get(ints.get(0), ints.get(1), ints.get(2));
+        } else {
+            return null;
+        }
     }
 
     public List<House> getHouses() {

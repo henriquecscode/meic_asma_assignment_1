@@ -1,6 +1,8 @@
 package Company;
 
 import Network.Location.City;
+import Network.Location.House;
+import Network.Location.Location;
 import Network.Location.Port;
 import Network.Network;
 import Vehicle.Seed.FleetSeed;
@@ -16,28 +18,26 @@ import Vehicle.Van;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Company {
 
-    private Network network;
-    private CompanySeed companySeed;
-    private FleetSeed fleetSeed;
-    private List<Hub> hubs = new ArrayList<>();
-    private List<GlobalHub> globalHubs = new ArrayList<>();
-    private HashMap<Integer, GlobalHub> globalHubsByLocation = new HashMap<>();
-    private List<RegionHub> regionHubs = new ArrayList<>();
-    private HashMap<List<Integer>, RegionHub> regionHubsByLocation = new HashMap<>();
-    private CompanyTypeVehicles ships;
-    private CompanyTypeVehicles semis;
-    private CompanyTypeVehicles vans;
+    private final Network network;
+    private final CompanySeed companySeed;
+    private final List<Hub> hubs = new ArrayList<>();
+    private final List<GlobalHub> globalHubs = new ArrayList<>();
+    private final HashMap<Integer, GlobalHub> globalHubsByLocation = new HashMap<>();
+    private final List<RegionHub> regionHubs = new ArrayList<>();
+    private final HashMap<List<Integer>, RegionHub> regionHubsByLocation = new HashMap<>();
+    private CompanyTypeVehicles<Ship> ships;
+    private CompanyTypeVehicles<Semi> semis;
+    private CompanyTypeVehicles<Van> vans;
 
     public Company(Network network, CompanySeed companySeed, FleetSeed fleetSeed) {
         this.network = network;
         this.companySeed = companySeed;
-        this.fleetSeed = fleetSeed;
         this.makeHubs(network, companySeed);
         this.makeVehicles(network, companySeed, fleetSeed);
-
     }
 
     public void makeHubs(Network network, CompanySeed companySeed) {
@@ -79,15 +79,15 @@ public class Company {
             ship.setHub(hub);
 
         }
-        this.ships = new CompanyTypeVehicles(ships);
+        this.ships = new CompanyTypeVehicles<Ship>(ships);
 
-        List<Semi> semis = new ArrayList<Semi>();
+        List<Semi> semis = new ArrayList<>();
         List<Integer> semiInGlobalLocations = companySeed.getGlobalSemiLocations();
         for (int i = 0; i < semiInGlobalLocations.size(); i++) {
             int portIndex = semiInGlobalLocations.get(i);
             Port port = network.getPorts().get(portIndex);
-            Vehicle semi = new Semi(this, port, fleetSeed.getSemiSeed());
-            semis.add((Semi) semi);
+            Semi semi = new Semi(this, port, fleetSeed.getSemiSeed());
+            semis.add(semi);
             Hub hub = globalHubsByLocation.get(portIndex);
             hub.addVehicle(semi);
             semi.setHub(hub);
@@ -98,27 +98,27 @@ public class Company {
             int port = semiInRegionalLocation.get(0);
             int city = semiInRegionalLocation.get(1);
             City cityLocation = network.getCitiesByLocation().get(port).get(city);
-            Vehicle semi = new Semi(this, cityLocation, fleetSeed.getSemiSeed());
-            semis.add((Semi) semi);
+            Semi semi = new Semi(this, cityLocation, fleetSeed.getSemiSeed());
+            semis.add(semi);
             Hub hub = regionHubsByLocation.get(List.of(port, city));
             hub.addVehicle(semi);
             semi.setHub(hub);
         }
-        this.semis = new CompanyTypeVehicles(semis);
+        this.semis = new CompanyTypeVehicles<Semi>(semis);
 
-        List<Van> vans = new ArrayList<Van>();
+        List<Van> vans = new ArrayList<>();
         List<List<Integer>> vanInRegionalLocations = companySeed.getVanLocations();
         for (List<Integer> vanInRegionalLocation : vanInRegionalLocations) {
             int port = vanInRegionalLocation.get(0);
             int city = vanInRegionalLocation.get(1);
             City cityLocation = network.getCitiesByLocation().get(port).get(city);
-            Vehicle van = new Van(this, cityLocation, fleetSeed.getVanSeed());
-            vans.add((Van) van);
+            Van van = new Van(this, cityLocation, fleetSeed.getVanSeed());
+            vans.add(van);
             Hub hub = regionHubsByLocation.get(List.of(port, city));
             hub.addVehicle(van);
             van.setHub(hub);
         }
-        this.vans = new CompanyTypeVehicles(vans);
+        this.vans = new CompanyTypeVehicles<Van>(vans);
     }
 
     public CompanySeed getSeed() {
@@ -133,25 +133,109 @@ public class Company {
         return regionHubs;
     }
 
-    public CompanyTypeVehicles getShips() {
+    public CompanyTypeVehicles<Ship> getShips() {
         return ships;
     }
 
-    public CompanyTypeVehicles getSemis() {
+    public CompanyTypeVehicles<Semi> getSemis() {
         return semis;
     }
 
-    public CompanyTypeVehicles getVans() {
+    public CompanyTypeVehicles<Van> getVans() {
         return vans;
+    }
+
+    public Network getNetwork() {
+        return network;
+    }
+
+    public Integer getPricePerVehicle() {
+        // TODO discuss how should this be set
+        return 1000;
+    }
+    private List<?> filterIdleVehicles(List<?> vehicles) {
+        return vehicles.stream().filter(v -> ((Vehicle) v).getState() instanceof Idle).collect(Collectors.toList());
+    }
+
+    // This is called to get the number of vehicles ready to go from start to end (being them directly connected)
+    public List<?> getVehiclesInAdjacentLocations(Location start, Location end) {
+        if (start instanceof Port) {
+            Port port = (Port) start;
+            List<Hub> hubs = port.getHubs();
+            GlobalHub companyGlobalHub = null;
+            for (Hub hub : hubs) {
+                if (hub.getCompany() == this) {
+                    companyGlobalHub = (GlobalHub) hub;
+                    break;
+                }
+            }
+
+            if (companyGlobalHub == null) {
+                return new ArrayList<>();
+            }
+
+            if (end instanceof Port) {
+                return filterIdleVehicles(companyGlobalHub.getShips());
+            } else if (end instanceof City) {
+                return filterIdleVehicles(companyGlobalHub.getSemis());
+            } else {
+                throw new IllegalArgumentException("Location end is not a valid type");
+            }
+        } else if (start instanceof City) {
+            City city = (City) start;
+            List<Hub> hubs = city.getHubs();
+            RegionHub companyRegionHub = null;
+            for (Hub hub : hubs) {
+                if (hub.getCompany() == this) {
+                    companyRegionHub = (RegionHub) hub;
+                    break;
+                }
+            }
+
+            if (companyRegionHub == null) {
+                return new ArrayList<>();
+            }
+
+            if (end instanceof Port) {
+                return filterIdleVehicles(companyRegionHub.getSemis());
+            } else if (end instanceof House) {
+                return filterIdleVehicles(companyRegionHub.getVans());
+            } else {
+                throw new IllegalArgumentException("Location end is not a valid type");
+            }
+        } else if (start instanceof House) {
+            House house = (House) start;
+            City city = (City) house.getUpperLocations().get(0);
+            List<Hub> hubs = city.getHubs();
+            RegionHub companyRegionHub = null;
+            for (Hub hub : hubs) {
+                if (hub.getCompany() == this) {
+                    companyRegionHub = (RegionHub) hub;
+                    break;
+                }
+            }
+
+            if (companyRegionHub == null) {
+                return new ArrayList<>();
+            }
+
+            if (end instanceof City) {
+                return filterIdleVehicles(companyRegionHub.getVans());
+            } else {
+                throw new IllegalArgumentException("Location end is not a valid type");
+            }
+        } else {
+            throw new IllegalArgumentException("Location start is not a valid type");
+        }
     }
 }
 
 class CompanyTypeVehicles<V extends Vehicle> {
 
     private List<V> vehicles = new ArrayList<>();
-    private List<V> idlingVehicles = new ArrayList<>();
-    private List<V> enRouteVehicles = new ArrayList<>();
-    private List<V> finishedVehicles = new ArrayList<>();
+    private final List<V> idlingVehicles = new ArrayList<>();
+    private final List<V> enRouteVehicles = new ArrayList<>();
+    private final List<V> finishedVehicles = new ArrayList<>();
 
     CompanyTypeVehicles(List<V> vehicles) {
         this.vehicles = vehicles;

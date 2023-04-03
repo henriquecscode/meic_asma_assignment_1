@@ -2,6 +2,7 @@ package Network.Graph;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Node {
     private static int uid = 0;
@@ -32,4 +33,22 @@ public class Node {
             this.adjacentNodes.add(from);
         }
     }
+
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Node)) {
+            return false;
+        }
+        Node node = (Node) o;
+        return id == node.id;
+    }
+
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    public int getId() {
+        return id;
+    }
+
 }

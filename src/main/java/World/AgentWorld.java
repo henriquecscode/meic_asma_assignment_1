@@ -114,6 +114,8 @@ public class AgentWorld extends World {
         }
     }
 
-    public void createProducerAgent(Producer producer) {
+    public void testProducerAgent(){
+        producersAgents.get(0).testProducerRequest();
     }
+
 }

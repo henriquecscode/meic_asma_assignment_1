@@ -1,6 +1,6 @@
 package Client;
 
-import Agents.Client.ClientAgent;
+import Agents.ClientAgent;
 import Network.Location.House;
 import Network.Network;
 import jade.wrapper.AgentController;
@@ -10,17 +10,18 @@ import jade.wrapper.StaleProxyException;
 import java.util.List;
 import java.util.Random;
 
-public class ClientSpawner {
+public class ClientSpawnerThread extends Thread {
+    public static final int MIN_SPAWN_INTERVAL_MS = 1000;
+    public static final int MAX_SPAWN_INTERVAL_MS = 10000;
+
     private static final Random random = new Random();
     private final Network network;
     private final ContainerController container;
-    private final ClientSpawnerConfigs configs;
     private static int clientIndex = 0;
 
-    public ClientSpawner(Network network, ContainerController container, ClientSpawnerConfigs configs) {
+    public ClientSpawnerThread(Network network, ContainerController container) {
         this.network = network;
         this.container = container;
-        this.configs = configs;
     }
 
     public void spawnClient() {
@@ -28,13 +29,12 @@ public class ClientSpawner {
         int networkSize = houses.size();
         int houseIndex = random.nextInt(networkSize);
         House house = houses.get(houseIndex);
-        ClientConfigs configs = spawnClientConfigs();
 
-        Client client = new Client(network, house, configs);
+        Client client = new Client(network, house);
 
-        String name = "Client" + String.format("%02d", ClientSpawner.getClientIndex());
+        String name = "Client" + String.format("%02d", ClientSpawnerThread.getClientIndex());
         try {
-            AgentController ac = container.acceptNewAgent(name, new ClientAgent(client));
+            AgentController ac = container.acceptNewAgent(name, new Agents.Client.ClientAgent(client));
             ac.start();
         } catch (StaleProxyException e) {
             throw new RuntimeException(e);
@@ -42,8 +42,17 @@ public class ClientSpawner {
         clientIndex++;
     }
 
-    public ClientConfigs spawnClientConfigs() {
-        return new ClientSpawnerConfigs().getClient();
+    @Override
+    public void run() {
+        while (!Thread.currentThread().isInterrupted()) {
+            spawnClient();
+            try {
+                int sleepTime = random.nextInt(MAX_SPAWN_INTERVAL_MS - MIN_SPAWN_INTERVAL_MS) + MIN_SPAWN_INTERVAL_MS;
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static int getClientIndex() {

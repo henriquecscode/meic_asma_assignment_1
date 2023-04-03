@@ -4,6 +4,8 @@ import Agents.Company.CompanyAgent;
 import Agents.Company.CompanyGlobalHubAgent;
 import Agents.Company.CompanyRegionHubAgent;
 import Agents.Producer.ProducerAgent;
+import Client.ClientSpawner;
+import Client.ClientSpawnerConfigs;
 import Company.GlobalHub;
 import Company.RegionHub;
 import Company.Company;
@@ -35,12 +37,15 @@ public class AgentWorld extends World {
     public void run() {
         initJade();
 
+        ClientSpawnerConfigs configs = new ClientSpawnerConfigs();
+        ClientSpawner clientSpawner = new ClientSpawner(network, container, configs);
         try {
             makeProducers();
             makeCompanies();
         } catch (StaleProxyException e) {
             throw new RuntimeException(e);
         }
+        clientSpawner.spawnClient();
     }
 
     private void makeProducers() throws StaleProxyException {
@@ -82,6 +87,7 @@ public class AgentWorld extends World {
             companyIndex++;
 
         }
+
     }
 
     private void initJade() {
@@ -100,6 +106,4 @@ public class AgentWorld extends World {
         }
     }
 
-    public void createProducerAgent(Producer producer) {
-    }
 }

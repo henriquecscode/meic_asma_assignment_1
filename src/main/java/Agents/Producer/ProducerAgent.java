@@ -23,7 +23,7 @@ public class ProducerAgent extends Agent {
         ServiceDescription sd;
         for (Production production : producer.getProductions()) {
             sd = new ServiceDescription();
-            sd.setType("producer-" + production.getProduct().getName());
+            sd.setType("producer");
             sd.setName(production.getProduct().getName());
             dfd.addServices(sd);
         }

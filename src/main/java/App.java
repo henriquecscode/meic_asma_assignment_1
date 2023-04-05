@@ -29,7 +29,7 @@ public class App {
         System.out.println("Hello, World!");
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
-        world.testProducerAgent();
+        world.testClientAgent();
     }
 
     public static void init() {

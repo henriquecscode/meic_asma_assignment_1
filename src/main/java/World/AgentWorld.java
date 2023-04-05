@@ -34,6 +34,8 @@ public class AgentWorld extends World {
         super(seed);
     }
 
+    ClientSpawnerThread clientSpawner;
+
     public AgentWorld(String networkSeedFilename, String fleetSeedFilename, java.util.List<String> companySeedFilenames, List<String> producerSeedFilenames) {
         super(networkSeedFilename, fleetSeedFilename, companySeedFilenames, producerSeedFilenames);
     }
@@ -47,9 +49,8 @@ public class AgentWorld extends World {
         } catch (StaleProxyException e) {
             throw new RuntimeException(e);
         }
-        ClientSpawnerThread clientSpawner = new ClientSpawnerThread(network, container);
-        clientSpawner.spawnClient();
-//        new ClientSpawnerThread(network, container).start(); // save thread to stop if necessary
+        clientSpawner = new ClientSpawnerThread(network, container);
+        //        new ClientSpawnerThread(network, container).start(); // save thread to stop if necessary
     }
 
     private void makeProducers() throws StaleProxyException {
@@ -116,6 +117,10 @@ public class AgentWorld extends World {
 
     public void testProducerAgent(){
         producersAgents.get(0).testProducerRequest();
+    }
+
+    public void testClientAgent() {
+        clientSpawner.spawnClient();
     }
 
 }

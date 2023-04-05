@@ -2,12 +2,15 @@ package Agents.Client;
 
 import Client.Client;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.proto.ContractNetInitiator;
+import jade.proto.SSResponderDispatcher;
 import jade.util.leap.Iterator;
 
 import java.util.*;
@@ -53,7 +56,6 @@ public class ClientAgent extends Agent {
                 productProducers.get(name).add(result[i]);
             }
         }
-
         return makeRequest(productProducers);
     }
 
@@ -71,21 +73,56 @@ public class ClientAgent extends Agent {
 
     }
 
-    class ProductRequestContractNetInit extends ContractNetInitiator{
+    class ProductRequestContractNetInit extends ContractNetInitiator {
         public ProductRequestContractNetInit(Agent a, ACLMessage cfp) {
             super(a, cfp);
         }
 
         protected Vector prepareCfps(ACLMessage cfp) {
             Vector v = new Vector();
-            for(DFAgentDescription producer : requestedProductproducers) {
+            for (DFAgentDescription producer : requestedProductproducers) {
                 cfp.addReceiver(producer.getName());
             }
             cfp.setContent(requestedProduct);
+            cfp.setProtocol("product-request");
 
 
             v.add(cfp);
             return v;
+        }
+
+        protected void handleAllResponses(Vector responses, Vector acceptances) {
+            int bestIndex = 0;
+            double bestPrice = Double.MAX_VALUE;
+
+            // choose only the best (lowest) price
+            for (int i = 0; i < responses.size(); i++) {
+                ACLMessage response = (ACLMessage) responses.get(i);
+
+                if (response.getPerformative() == ACLMessage.PROPOSE) {
+                    double responsePrice = Double.parseDouble(response.getContent());
+                    if (responsePrice < bestPrice) {
+                        bestPrice = responsePrice;
+                        bestIndex = i;
+                    }
+                }
+            }
+
+            // accept proposal of responses[i] and reject all others
+            for (int i = 0; i < responses.size(); i++) {
+                ACLMessage response = (ACLMessage) responses.get(i);
+                ACLMessage msg = response.createReply();
+                if (i == bestIndex) {
+                    msg.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+                } else {
+                    msg.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                }
+                acceptances.add(msg);
+            }
+        }
+
+        protected void handleAllResultNotifications(Vector resultNotifications) {
+            System.out.println("got " + resultNotifications.size() + " result notifs!");
         }
     }
 }

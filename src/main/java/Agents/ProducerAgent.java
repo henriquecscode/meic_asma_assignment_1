@@ -188,16 +188,27 @@ public class ProducerAgent extends Agent {
                 }
 
             }
+            Set<Integer> companiesWithAcceptedProposal = new HashSet<>();
             for (int i = 0; i < prices.size(); i++) {
                 if (prices.get(i) == Double.MAX_VALUE) {
                     throw new RuntimeException("No company could offer a price for the route");
                 }
-                ACLMessage response = (ACLMessage) responses.get(companiesResponseIndex.get(i));
+                int companyIndex = companiesResponseIndex.get(i);
+                ACLMessage response = (ACLMessage) responses.get(companyIndex);
                 ACLMessage msg = response.createReply();
                 System.out.println(myAgent.getName() + " got an answer from " + response.getSender().getName() + " with content " + response.getContent());
                 msg.setPerformative(ACLMessage.ACCEPT_PROPOSAL); // OR NOT!
                 msg.setContent(Integer.toString(i));
                 acceptances.add(msg);
+                companiesWithAcceptedProposal.add(companyIndex);
+            }
+            for (int i = 0; i < responses.size(); i++) {
+                if (!companiesWithAcceptedProposal.contains(i)) {
+                    ACLMessage response = (ACLMessage) responses.get(i);
+                    ACLMessage msg = response.createReply();
+                    msg.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                    acceptances.add(msg);
+                }
             }
         }
 

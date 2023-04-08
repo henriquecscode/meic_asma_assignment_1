@@ -1,16 +1,14 @@
 package Agents.Client;
 
 import Client.Client;
+import Company.Request;
 import jade.core.Agent;
-import jade.core.behaviours.Behaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import jade.proto.ContractNetInitiator;
-import jade.proto.SSResponderDispatcher;
 import jade.util.leap.Iterator;
 
 import java.util.*;
@@ -46,7 +44,6 @@ public class ClientAgent extends Agent {
             return null;
         }
         for (int i = 0; i < result.length; ++i) {
-//            System.out.println("Found " + result[i].getName());
             for (Iterator it = result[i].getAllServices(); it.hasNext(); ) {
                 ServiceDescription serviceDescription = (ServiceDescription) it.next();
                 String name = serviceDescription.getName();
@@ -67,7 +64,7 @@ public class ClientAgent extends Agent {
         String randomKey = productKeys.get(r.nextInt(productKeys.size()));
         List<DFAgentDescription> producers = productProducers.get(randomKey);
         System.out.println("Client-agent " + getAID().getName() + " is requesting " + randomKey + " from " + producers.size() + " producers.");
-        for(DFAgentDescription producer : producers) {
+        for (DFAgentDescription producer : producers) {
             System.out.println("Producer: " + producer.getName());
         }
         this.requestedProduct = randomKey;
@@ -87,7 +84,8 @@ public class ClientAgent extends Agent {
             for (DFAgentDescription producer : requestedProductproducers) {
                 cfp.addReceiver(producer.getName());
             }
-            cfp.setContent(requestedProduct + "," + client.getHouse().getName());
+            Request request = new Request(null, client.getHouse(), requestedProduct, 1);
+            cfp.setContent(request.toString());
             cfp.setProtocol("product-request");
 
 

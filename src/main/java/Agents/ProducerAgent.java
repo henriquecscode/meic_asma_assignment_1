@@ -1,11 +1,9 @@
 package Agents;
 
 
-import Agents.Company.CompanyAgent;
-import Company.Company;
+import Company.Request;
 import Network.Location.House;
 import Network.Location.Location;
-import Network.Route.Itinerary;
 import Producer.Producer;
 import Producer.Production;
 import jade.core.AID;
@@ -90,9 +88,9 @@ public class ProducerAgent extends Agent {
         getCompanies();
 
         List<Location> path = Arrays.asList(producer.getLocation(), house);
-        Itinerary itinerary = new Itinerary(path);
+        Request request = new Request(producer.getLocation(), house, "testProduct", 1);
 
-//        addBehaviour(new RouteRequestContractNetInit(this, new ACLMessage(ACLMessage.CFP), itinerary));
+//        addBehaviour(new RouteRequestContractNetInit(this, new ACLMessage(ACLMessage.CFP), request));
 
     }
 
@@ -110,35 +108,30 @@ public class ProducerAgent extends Agent {
     class ProductRequestContractNetResponder extends SSContractNetResponder {
 
         List<ACLMessage> acceptedProposals = new ArrayList<>();
+        Request request;
+        Production production;
 
         public ProductRequestContractNetResponder(Agent a, ACLMessage cfp) {
             super(a, cfp);
-            Itinerary itinerary = getItinerary(cfp);
-            Production production = getProduction(cfp);
+            request = getRequest(cfp);
+            production = getProduction();
             if (production != null) {
-                registerHandleCfp(new RouteRequestContractNetInit(myAgent, new ACLMessage(ACLMessage.CFP), itinerary, production, CFP_KEY, REPLY_KEY));
+                registerHandleCfp(new RouteRequestContractNetInit(myAgent, new ACLMessage(ACLMessage.CFP), CFP_KEY, REPLY_KEY));
                 registerHandleAcceptProposal(new RouteRequestConfirmationContractNetInit(myAgent, true));
                 registerHandleRejectProposal(new RouteRequestConfirmationContractNetInit(myAgent, false));
             }
 
         }
 
-        private Itinerary getItinerary(ACLMessage cfp) {
+        private Request getRequest(ACLMessage cfp) {
             String content = cfp.getContent();
-            String[] contentSplit = content.split(",");
-            String requestProduct = contentSplit[0];
-            String requestLocation = contentSplit[1];
-            Location clientLocation = producer.network.getLocation(requestLocation);
-            Itinerary itinerary = new Itinerary(Arrays.asList(producer.getLocation(), clientLocation));
-            return itinerary;
+            Request request = new Request(producer.network, content);
+            Request producerRequest = new Request(producer.getLocation(), request.getEnd(), request.getProductName(), request.getQuantity());
+            return producerRequest;
         }
 
-        private Production getProduction(ACLMessage cfp) {
-            //get production with name from the cfp.getContent()
-            // only set to Propose if product exists
-            String content = cfp.getContent();
-            String[] contentSplit = content.split(",");
-            String productName = contentSplit[0];
+        private Production getProduction() {
+            String productName = request.getProductName();
             producer.getProductions();
             Optional<Production> optionalProduction = producer.getProductions().stream().filter(p -> p.getProduct().getName().equals(productName)).findFirst();
             Production production;
@@ -164,21 +157,17 @@ public class ProducerAgent extends Agent {
         }
 
         class RouteRequestContractNetInit extends ContractNetInitiator {
-            private Itinerary itinerary;
-            private Production requestProduction;
             private String Carried_CFP_KEY, Carried_REPLY_KEY;
 
-            public RouteRequestContractNetInit(Agent a, ACLMessage cfp, Itinerary itinerary, Production production, String CFP_KEY, String REPLY_CFP) {
+            public RouteRequestContractNetInit(Agent a, ACLMessage cfp, String CFP_KEY, String REPLY_CFP) {
                 super(a, cfp);
-                this.itinerary = itinerary;
-                this.requestProduction = production;
                 this.Carried_CFP_KEY = CFP_KEY;
                 this.Carried_REPLY_KEY = REPLY_CFP;
             }
 
             protected Vector prepareCfps(ACLMessage cfp) {
 
-                cfp.setContent(String.valueOf(itinerary));
+                cfp.setContent(request.toString());
                 cfp.setProtocol("route-request");
                 getCompanies();
                 for (AID company : companies) {
@@ -192,9 +181,10 @@ public class ProducerAgent extends Agent {
             protected void handleAllResponses(Vector responses, Vector acceptances) {
 
                 System.out.println("got " + responses.size() + " responses!");
-                List<Double> prices = Arrays.asList(new Double[itinerary.getSize()]);
+                int numberRoutes = request.getRoute().size() -1;
+                List<Double> prices = Arrays.asList(new Double[numberRoutes]);
                 Collections.fill(prices, Double.MAX_VALUE);
-                List<Integer> companiesResponseIndex = Arrays.asList(new Integer[itinerary.getSize()]);
+                List<Integer> companiesResponseIndex = Arrays.asList(new Integer[numberRoutes]);
                 List<Double> offeredPrices;
                 for (int i = 0; i < responses.size(); i++) {
                     ACLMessage response = (ACLMessage) responses.get(i);
@@ -261,7 +251,7 @@ public class ProducerAgent extends Agent {
 
             private double calculatePrice(List<Double> prices) {
                 double totalRoutePrice = 0;
-                double productionMult = requestProduction.getPriceMult();
+                double productionMult = production.getPriceMult();
                 for (Double price : prices) {
                     totalRoutePrice += price;
                 }
@@ -273,7 +263,6 @@ public class ProducerAgent extends Agent {
         class RouteRequestConfirmationContractNetInit extends Behaviour {
             private boolean accept;
             private boolean isDone = false;
-            private String Carried_REPLY_KEY;
 
             public RouteRequestConfirmationContractNetInit(Agent a, boolean accept) {
                 super(a);

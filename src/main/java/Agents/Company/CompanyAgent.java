@@ -4,9 +4,7 @@ package Agents.Company;
 import Company.Company;
 import Network.Location.House;
 import Company.Request;
-import Company.RequestPrice;
 import Network.Location.Location;
-import Network.Route.Itinerary;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.domain.DFService;
@@ -21,8 +19,6 @@ import jade.proto.SSResponderDispatcher;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import java.util.List;
 
 public class CompanyAgent extends Agent {
 
@@ -69,10 +65,9 @@ public class CompanyAgent extends Agent {
         }
     }
 
-    public List<Double> getRoutePrices(Itinerary itinerary){
-        List<Location> locations = itinerary.getLocations();
+    public List<Double> getRoutePrices(List<Location> locations) {
         List<Double> prices = new ArrayList<>();
-        for(int i = 0; i < locations.size()-1; i++){
+        for (int i = 0; i < locations.size() - 1; i++) {
             double price = random.nextInt(100);
             prices.add(price);
         }
@@ -99,7 +94,8 @@ public class CompanyAgent extends Agent {
     }
 
     class RouteRequestContractNetResponder extends SSContractNetResponder {
-        Itinerary itinerary;
+        Request request;
+
         public RouteRequestContractNetResponder(Agent a, ACLMessage cfp) {
             super(a, cfp);
         }
@@ -108,10 +104,10 @@ public class CompanyAgent extends Agent {
             ACLMessage reply = cfp.createReply();
             reply.setPerformative(ACLMessage.PROPOSE);
             String content = cfp.getContent();
-            itinerary = new Itinerary(company.getNetwork(), content);
-            List<Double> prices = getRoutePrices(itinerary);
+            request = new Request(company.network, content);
+            List<Double> prices = getRoutePrices(request.getRoute());
             reply.setContent(String.join(",", prices.stream().map(Object::toString).toArray(String[]::new)));
-            reply.addUserDefinedParameter("log",prices.toString() +" to " + cfp.getSender().getLocalName() + " (from " + myAgent.getLocalName() + ")" );
+            reply.addUserDefinedParameter("log", prices.toString() + " to " + cfp.getSender().getLocalName() + " (from " + myAgent.getLocalName() + ")");
             // ...
             System.out.println(myAgent.getLocalName() + " sending reply to route request from " + cfp.getSender().getName() + "!");
             return reply;
@@ -128,8 +124,8 @@ public class CompanyAgent extends Agent {
             result.setContent("this is the result");
 
             Integer itineraryRouteIndex = Integer.valueOf(accept.getContent());
-            Location location1 = itinerary.getLocations().get(itineraryRouteIndex);
-            Location location2 = itinerary.getLocations().get(itineraryRouteIndex+1);
+            Location location1 = request.getRoute().get(itineraryRouteIndex);
+            Location location2 = request.getRoute().get(itineraryRouteIndex + 1);
             //need to do some handling to coordinate with the other companies
             return result;
         }

@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 public class Company {
 
-    private final Network network;
+    public final Network network;
     private final CompanySeed companySeed;
     private final List<Hub> hubs = new ArrayList<>();
     private final List<GlobalHub> globalHubs = new ArrayList<>();

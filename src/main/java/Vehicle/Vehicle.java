@@ -80,6 +80,10 @@ public class Vehicle {
         return state;
     }
 
+    public void setState(State state) {
+        this.state = state;
+    }
+
     public void setHub(Hub hub) {
         this.hub = hub;
     }

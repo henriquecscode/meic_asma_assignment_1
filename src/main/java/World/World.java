@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 public class World {
     protected final static int NUMBER_OF_COMPANIES = 10;
     protected final static int NUMBER_OF_PRODUCERS = 20;
+    protected final static long startTime = System.currentTimeMillis();
     protected WorldSeed worldSeed;
     protected Network network;
     protected NetworkSeed networkSeed;
@@ -175,5 +176,8 @@ public class World {
     }
 
 
+    public static long getTime() {
+        return System.currentTimeMillis() - startTime;
+    }
 }
 

@@ -77,6 +77,7 @@ public class Company {
             Hub hub = globalHubsByLocation.get(portIndex);
             hub.addVehicle(ship);
             ship.setHub(hub);
+            ship.setLocation(shipLocation);
 
         }
         this.ships = new CompanyTypeVehicles<Ship>(ships);
@@ -91,6 +92,7 @@ public class Company {
             Hub hub = globalHubsByLocation.get(portIndex);
             hub.addVehicle(semi);
             semi.setHub(hub);
+            semi.setLocation(port);
         }
 
         List<List<Integer>> semiInRegionalLocations = companySeed.getRegionalSemiLocations();
@@ -103,6 +105,7 @@ public class Company {
             Hub hub = regionHubsByLocation.get(List.of(port, city));
             hub.addVehicle(semi);
             semi.setHub(hub);
+            semi.setLocation(cityLocation);
         }
         this.semis = new CompanyTypeVehicles<Semi>(semis);
 
@@ -117,6 +120,7 @@ public class Company {
             Hub hub = regionHubsByLocation.get(List.of(port, city));
             hub.addVehicle(van);
             van.setHub(hub);
+            van.setLocation(cityLocation);
         }
         this.vans = new CompanyTypeVehicles<Van>(vans);
     }

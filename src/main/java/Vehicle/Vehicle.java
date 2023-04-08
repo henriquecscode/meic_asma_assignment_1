@@ -15,7 +15,9 @@ public class Vehicle {
     public VehicleSeed seed;
     public Company company;
     private Hub hub = null;
-    private int cargo;
+    private Location location = null;
+    private final int cargo;
+    private int filledUpCargo = 0;
     private int speed;
     private int costPerMile;
     private int upkeep;
@@ -38,8 +40,28 @@ public class Vehicle {
         return name;
     }
 
-    public int getCargo() {
+    public int getCargoCapacity() {
         return cargo;
+    }
+
+    public int getFilledUpCargo() {
+        return filledUpCargo;
+    }
+
+    public boolean fillUpCargo(int cargo) {
+        if (filledUpCargo + cargo > this.cargo) {
+            return false;
+        }
+        filledUpCargo += cargo;
+        return true;
+    }
+
+    public boolean canFillUpCargo(int cargo) {
+        return filledUpCargo + cargo <= this.cargo;
+    }
+
+    public void emptyCargo() {
+        filledUpCargo = 0;
     }
 
     public int getSpeed() {
@@ -64,6 +86,14 @@ public class Vehicle {
 
     public Hub getHub() {
         return hub;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    public Location getLocation() {
+        return location;
     }
 }
 

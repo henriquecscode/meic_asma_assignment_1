@@ -117,8 +117,8 @@ public class ProducerAgent extends Agent {
             Production production = getProduction(cfp);
             if (production != null) {
                 registerHandleCfp(new RouteRequestContractNetInit(myAgent, new ACLMessage(ACLMessage.CFP), itinerary, production, CFP_KEY, REPLY_KEY));
-                registerHandleAcceptProposal(new RouteRequestConfirmationContractNetInit(myAgent, new ACLMessage(ACLMessage.CFP), true));
-                registerHandleRejectProposal(new RouteRequestConfirmationContractNetInit(myAgent, new ACLMessage(ACLMessage.CFP), false));
+                registerHandleAcceptProposal(new RouteRequestConfirmationContractNetInit(myAgent, true));
+                registerHandleRejectProposal(new RouteRequestConfirmationContractNetInit(myAgent, false));
             }
 
         }
@@ -157,6 +157,10 @@ public class ProducerAgent extends Agent {
             ACLMessage reply = cfp.createReply();
             reply.setPerformative(ACLMessage.REFUSE);
             return reply;
+        }
+
+        protected void cleanReply() {
+            getDataStore().remove(REPLY_KEY);
         }
 
         class RouteRequestContractNetInit extends ContractNetInitiator {
@@ -266,26 +270,33 @@ public class ProducerAgent extends Agent {
             }
         }
 
-        class RouteRequestConfirmationContractNetInit extends ContractNetInitiator {
+        class RouteRequestConfirmationContractNetInit extends Behaviour {
             private boolean accept;
+            private boolean isDone = false;
+            private String Carried_REPLY_KEY;
 
-            public RouteRequestConfirmationContractNetInit(Agent a, ACLMessage cfp, boolean accept) {
-                super(a, cfp);
+            public RouteRequestConfirmationContractNetInit(Agent a, boolean accept) {
+                super(a);
                 this.accept = accept;
             }
 
-            protected Vector prepareCfps(ACLMessage cfp) {
-                Vector v = new Vector();
-
+            @Override
+            public void action() {
+                cleanReply();
                 for (ACLMessage acceptedProposal : acceptedProposals) {
-                    if (!accept) {
-                        acceptedProposal.setPerformative(ACLMessage.REJECT_PROPOSAL);
-                    }else{
+                    if (accept) {
                         acceptedProposal.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+                    } else {
+                        acceptedProposal.setPerformative(ACLMessage.REJECT_PROPOSAL);
                     }
-                    v.add(acceptedProposal);
+                    myAgent.send(acceptedProposal);
+                    isDone = true;
                 }
-                return v;
+            }
+
+            @Override
+            public boolean done() {
+                return isDone;
             }
         }
     }

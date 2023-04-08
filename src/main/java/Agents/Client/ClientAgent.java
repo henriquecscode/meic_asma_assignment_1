@@ -46,7 +46,7 @@ public class ClientAgent extends Agent {
             return null;
         }
         for (int i = 0; i < result.length; ++i) {
-            System.out.println("Found " + result[i].getName());
+//            System.out.println("Found " + result[i].getName());
             for (Iterator it = result[i].getAllServices(); it.hasNext(); ) {
                 ServiceDescription serviceDescription = (ServiceDescription) it.next();
                 String name = serviceDescription.getName();
@@ -56,6 +56,7 @@ public class ClientAgent extends Agent {
                 productProducers.get(name).add(result[i]);
             }
         }
+
         return makeRequest(productProducers);
     }
 
@@ -65,7 +66,10 @@ public class ClientAgent extends Agent {
         Random r = new Random(1);
         String randomKey = productKeys.get(r.nextInt(productKeys.size()));
         List<DFAgentDescription> producers = productProducers.get(randomKey);
-
+        System.out.println("Client-agent " + getAID().getName() + " is requesting " + randomKey + " from " + producers.size() + " producers.");
+        for(DFAgentDescription producer : producers) {
+            System.out.println("Producer: " + producer.getName());
+        }
         this.requestedProduct = randomKey;
         this.requestedProductproducers = producers;
         return producers;
@@ -83,7 +87,7 @@ public class ClientAgent extends Agent {
             for (DFAgentDescription producer : requestedProductproducers) {
                 cfp.addReceiver(producer.getName());
             }
-            cfp.setContent(requestedProduct);
+            cfp.setContent(requestedProduct + "," + client.getHouse().getName());
             cfp.setProtocol("product-request");
 
 

@@ -14,9 +14,9 @@ public class CompanyCreator implements CreatorInterface {
     private final int NO_GLOBAL = 3;
     private final int NO_REGIONAL = 5;
     private final int NO_SHIPS = NO_GLOBAL;
-    private final int NO_SEMIS_IN_GLOBAL = 0;
-    private final int NO_SEMIS_IN_REGIONAL = NO_REGIONAL;
-    private final int NO_VANS = 0;
+    private final int NO_SEMIS_IN_GLOBAL = NO_GLOBAL;
+    private final int NO_SEMIS_IN_REGIONAL = 0;
+    private final int NO_VANS = 10;
     private NetworkSeed seed;
 
     public CompanyCreator(NetworkSeed seed) {

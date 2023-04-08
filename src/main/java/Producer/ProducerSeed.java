@@ -58,7 +58,7 @@ public class ProducerSeed extends ClassSeed implements SeedInterface {
         for (ProductionSeed seed : productionSeeds) {
             productionSeed += seed.serialize() + " ";
         }
-        productionSeed += location.get(0) + " " + location.get(1) + " " + location.get(2);
+        productionSeed += location.get(0) + " " + location.get(1) + " " + location.get(2) + '\n';
         return productionSeed;
     }
 

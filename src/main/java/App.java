@@ -1,4 +1,5 @@
 import World.AgentWorld;
+import World.World;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         init();
-        AgentWorld world = new AgentWorld("2023_03_17_09_13_28_seed");
+        AgentWorld world = new AgentWorld("2023_04_08_15_27_41_seed");
         world.run();
         System.out.println("Hello, World!");
         Scanner scanner = new Scanner(System.in);

@@ -21,6 +21,7 @@ public class WorldSeed extends ClassSeed implements SeedInterface {
     public WorldSeed(String filename) {
         super(filename);
     }
+
     public WorldSeed(NetworkSeed networkSeed, FleetSeed fleetSeed, List<CompanySeed> companySeeds, List<ProducerSeed> producerSeeds) {
         this.networkSeed = networkSeed;
         this.fleetSeed = fleetSeed;
@@ -36,18 +37,31 @@ public class WorldSeed extends ClassSeed implements SeedInterface {
         producerSeeds = new ArrayList<>();
     }
 
+    static void seekAndConsumeTexts(Scanner scanner, String text) {
+        String placeholder;
+        while (!scanner.hasNext(text) && scanner.hasNextLine()) {
+            placeholder = scanner.next();
+        }
+        scanner.next();
+    }
+
     @Override
     public void scanSeed(Scanner scanner) {
+
         networkSeed.scanSeed(scanner);
         fleetSeed.scanSeed(scanner);
+        WorldSeed.seekAndConsumeTexts(scanner, "Companies:");
         int numberOfCompanies = scanner.nextInt();
         for (int i = 0; i < numberOfCompanies; i++) {
+            WorldSeed.seekAndConsumeTexts(scanner, "Company" + i + ":");
             CompanySeed companySeed = new CompanySeed();
             companySeed.scanSeed(scanner);
             companySeeds.add(companySeed);
         }
+        WorldSeed.seekAndConsumeTexts(scanner, "Producers:");
         int numberOfProducers = scanner.nextInt();
         for (int i = 0; i < numberOfProducers; i++) {
+            WorldSeed.seekAndConsumeTexts(scanner, "Producer" + i + ":");
             ProducerSeed producerSeed = new ProducerSeed();
             producerSeed.scanSeed(scanner);
             producerSeeds.add(producerSeed);
@@ -62,15 +76,20 @@ public class WorldSeed extends ClassSeed implements SeedInterface {
     @Override
     public String serialize() {
         String text = "";
-        text += networkSeed.serialize() + " ";
-        text += fleetSeed.serialize() + " ";
-        text += companySeeds.size() + " ";
-        for (CompanySeed companySeed : companySeeds) {
-            text += companySeed.serialize() + " ";
+        text += networkSeed.serialize() + "\n";
+        text += fleetSeed.serialize() + "\n";
+        text += "Companies:\n";
+        text += companySeeds.size() + "\n";
+        for (int i = 0; i < companySeeds.size(); i++) {
+            text += "Company" + i + ":\n";
+            text += companySeeds.get(i).serialize();
         }
-        text += producerSeeds.size() + " ";
-        for (ProducerSeed producerSeed : producerSeeds) {
-            text += producerSeed.serialize() + " ";
+        text += "\n";
+        text += "Producers:\n";
+        text += producerSeeds.size() + "\n";
+        for (int i = 0; i < producerSeeds.size(); i++) {
+            text += "Producer" + i + ":\n";
+            text += producerSeeds.get(i).serialize();
         }
         return text;
     }

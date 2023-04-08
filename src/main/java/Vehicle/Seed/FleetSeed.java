@@ -56,6 +56,6 @@ public class FleetSeed extends ClassSeed implements SeedInterface {
 
     @Override
     public String serialize() {
-        return shipSeed.serialize() + "\n" + semiSeed.serialize() + "\n" + vanSeed.serialize();
+        return shipSeed.serialize() + "\n" + semiSeed.serialize() + "\n" + vanSeed.serialize() + "\n";
     }
 }

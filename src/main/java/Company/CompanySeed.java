@@ -131,6 +131,9 @@ public class CompanySeed extends ClassSeed implements SeedInterface {
         for (int i = 0; i < this.numberOfVans; i++) {
             text += this.vanLocations.get(i).get(0) + " " + this.vanLocations.get(i).get(1) + " ";
         }
+        text += "\n";
+
+        text += "\n";
 
         return text;
     }

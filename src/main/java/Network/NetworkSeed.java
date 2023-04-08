@@ -95,6 +95,7 @@ public class NetworkSeed extends ClassSeed implements SeedInterface {
                 }
             }
         }
+        text += "\n";
         return text;
     }
 

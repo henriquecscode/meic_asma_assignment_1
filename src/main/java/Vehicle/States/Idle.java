@@ -4,14 +4,11 @@ import Network.Location.Location;
 import Vehicle.Vehicle;
 
 public class Idle extends State {
-    private Location location;
+    private final Location location;
 
-    public Idle(Vehicle vehicle) {
-        super(vehicle);
-    }
 
-    public Idle(Vehicle vehicle, Location location) {
-        super(vehicle);
+    public Idle(Location location) {
+        super();
         this.location = location;
     }
 }

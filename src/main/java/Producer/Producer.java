@@ -49,4 +49,13 @@ public class Producer {
     public House getLocation() {
         return location;
     }
+
+    public static Product getProduct(String productName) {
+        for (Product product : availableProducts) {
+            if (product.getName().equals(productName)) {
+                return product;
+            }
+        }
+        return null;
+    }
 }

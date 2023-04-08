@@ -10,11 +10,13 @@ import Network.Network;
 public class FulfilledRequest extends Request {
     private List<Dispatch> dispatches = new ArrayList<>();
     private double price;
-    private int startedOn;
-    private int finishedOn;
+    private long startedOn;
+    private long finishedOn;
+    private int requestStage;
 
     public FulfilledRequest(Request request) {
         super(request.getStart(), request.getEnd(), request.getProductName(), request.getQuantity());
+        this.requestStage = -1;
     }
 
 
@@ -33,6 +35,50 @@ public class FulfilledRequest extends Request {
 
     public void setDispatches(List<Dispatch> dispatches) {
         this.dispatches = dispatches;
+    }
+
+    public List<Dispatch> getDispatches() {
+        return dispatches;
+    }
+
+    public Dispatch getDispatch(int i) {
+        return dispatches.get(i);
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public long getStartedOn() {
+        return startedOn;
+    }
+
+    public long getFinishedOn() {
+        return finishedOn;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public void setStartedOn(long startedOn) {
+        this.startedOn = startedOn;
+    }
+
+    public void setFinishedOn(long finishedOn) {
+        this.finishedOn = finishedOn;
+    }
+
+    public int getRequestStage() {
+        return requestStage;
+    }
+
+    public void setRequestStage(int requestStage) {
+        this.requestStage = requestStage;
+    }
+
+    public void increaseRequestStage() {
+        this.requestStage++;
     }
 
     @Override

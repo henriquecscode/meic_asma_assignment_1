@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Random;
 
 public class ProducerCreator implements CreatorInterface {
-    private static final Random random = new Random();
+    private static final Random random = new Random(1);
     private static final int NUMBER_OF_PRODUCTIONS = 2;
     private final NetworkSeed seed;
     private final ProductCreator productCreator;

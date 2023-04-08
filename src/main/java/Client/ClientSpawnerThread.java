@@ -14,7 +14,7 @@ public class ClientSpawnerThread extends Thread {
     public static final int MIN_SPAWN_INTERVAL_MS = 1000;
     public static final int MAX_SPAWN_INTERVAL_MS = 10000;
 
-    private static final Random random = new Random();
+    private static final Random random = new Random(1);
     private final Network network;
     private final ContainerController container;
     private static int clientIndex = 0;

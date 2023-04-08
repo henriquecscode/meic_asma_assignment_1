@@ -6,7 +6,7 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 public class Randomizer {
-    private final static Random random = new Random();
+    private final static Random random = new Random(1);
 
     public static <T> List<T> generalAllocatorReplacement(List<T> slots, int noAllocations) {
         List<T> allocatedSlots = new ArrayList<>();

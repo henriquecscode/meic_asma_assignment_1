@@ -93,6 +93,7 @@ public class CompanyAgent extends Agent {
         }
 
         protected Behaviour createResponder(ACLMessage cfp) {
+            System.out.println(myAgent.getLocalName() + " got a route request from " + cfp.getSender().getLocalName() + "!");
             return new RouteRequestContractNetResponder(myAgent, cfp);
         }
     }
@@ -110,17 +111,18 @@ public class CompanyAgent extends Agent {
             itinerary = new Itinerary(company.getNetwork(), content);
             List<Double> prices = getRoutePrices(itinerary);
             reply.setContent(String.join(",", prices.stream().map(Object::toString).toArray(String[]::new)));
-            reply.addUserDefinedParameter("log",prices.toString() +" to " + cfp.getSender().getName() + " (from " + myAgent.getLocalName() + ")" );
+            reply.addUserDefinedParameter("log",prices.toString() +" to " + cfp.getSender().getLocalName() + " (from " + myAgent.getLocalName() + ")" );
             // ...
+            System.out.println(myAgent.getLocalName() + " sending reply to route request from " + cfp.getSender().getName() + "!");
             return reply;
         }
 
         protected void handleRejectProposal(ACLMessage cfp, ACLMessage propose, ACLMessage reject) {
-            System.out.println(myAgent.getLocalName() + " got a reject...");
+            System.out.println(myAgent.getLocalName() + " got a reject from " + reject.getSender().getLocalName() + "!");
         }
 
         protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
-            System.out.println(myAgent.getLocalName() + " got an accept!");
+            System.out.println(myAgent.getLocalName() + " got an accept from" + accept.getSender().getLocalName());
             ACLMessage result = accept.createReply();
             result.setPerformative(ACLMessage.INFORM);
             result.setContent("this is the result");

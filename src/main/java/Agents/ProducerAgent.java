@@ -59,6 +59,9 @@ public class ProducerAgent extends Agent {
     }
 
     public void getCompanies() {
+        if (!companies.isEmpty()) {
+            return;
+        }
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
         sd.setType("company");
@@ -75,22 +78,21 @@ public class ProducerAgent extends Agent {
         }
     }
 
-    public double getProductPrice(Production production){
+    public double getProductPrice(Production production) {
         return production.getPriceMult();
     }
 
     public void testProducerRequest() {
-        Random random = new Random();
+        Random random = new Random(1);
         List<House> houses = producer.network.getHouses();
         House house = houses.get(random.nextInt(houses.size()));
 
-        if (companies.isEmpty()) {
-            getCompanies();
-        }
+        getCompanies();
+
         List<Location> path = Arrays.asList(producer.getLocation(), house);
         Itinerary itinerary = new Itinerary(path);
 
-        addBehaviour(new RouteRequestContractNetInit(this, new ACLMessage(ACLMessage.CFP), itinerary));
+//        addBehaviour(new RouteRequestContractNetInit(this, new ACLMessage(ACLMessage.CFP), itinerary));
 
     }
 
@@ -100,109 +102,203 @@ public class ProducerAgent extends Agent {
         }
 
         protected Behaviour createResponder(ACLMessage cfp) {
+            System.out.println(myAgent.getLocalName() + ": Received product request from " + cfp.getSender().getLocalName());
             return new ProductRequestContractNetResponder(myAgent, cfp);
         }
     }
 
     class ProductRequestContractNetResponder extends SSContractNetResponder {
 
+        List<ACLMessage> acceptedProposals = new ArrayList<>();
+
         public ProductRequestContractNetResponder(Agent a, ACLMessage cfp) {
             super(a, cfp);
+            Itinerary itinerary = getItinerary(cfp);
+            Production production = getProduction(cfp);
+            if (production != null) {
+                registerHandleCfp(new RouteRequestContractNetInit(myAgent, new ACLMessage(ACLMessage.CFP), itinerary, production, CFP_KEY, REPLY_KEY));
+                registerHandleAcceptProposal(new RouteRequestConfirmationContractNetInit(myAgent, true));
+                registerHandleRejectProposal(new RouteRequestConfirmationContractNetInit(myAgent, false));
+            }
+
         }
 
-        protected ACLMessage handleCfp(ACLMessage cfp) {
+        private Itinerary getItinerary(ACLMessage cfp) {
+            String content = cfp.getContent();
+            String[] contentSplit = content.split(",");
+            String requestProduct = contentSplit[0];
+            String requestLocation = contentSplit[1];
+            Location clientLocation = producer.network.getLocation(requestLocation);
+            Itinerary itinerary = new Itinerary(Arrays.asList(producer.getLocation(), clientLocation));
+            return itinerary;
+        }
 
+        private Production getProduction(ACLMessage cfp) {
             //get production with name from the cfp.getContent()
-            ACLMessage reply = cfp.createReply();
             // only set to Propose if product exists
-
-            String productName = cfp.getContent();
+            String content = cfp.getContent();
+            String[] contentSplit = content.split(",");
+            String productName = contentSplit[0];
             producer.getProductions();
             Optional<Production> optionalProduction = producer.getProductions().stream().filter(p -> p.getProduct().getName().equals(productName)).findFirst();
             Production production;
 
-            if(!optionalProduction.isPresent()){
+            if (!optionalProduction.isPresent()) {
                 // We don't have the production. Reject the proposal
-                reply.setPerformative(ACLMessage.REFUSE);
-            }else{
-                reply.setPerformative(ACLMessage.PROPOSE);
-                production = optionalProduction.get();
-                double price = getProductPrice(production);
-                reply.setContent(Double.toString(price));
+                return null;
             }
+            production = optionalProduction.get();
+            return production;
 
+        }
+
+        protected ACLMessage handleCfp(ACLMessage cfp) {
+            // production was necessarily null
+            ACLMessage reply = cfp.createReply();
+            reply.setPerformative(ACLMessage.REFUSE);
             return reply;
         }
 
-        protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
-            ACLMessage reply = accept.createReply();
-            reply.setPerformative(ACLMessage.INFORM);
-            return reply;
+        protected void cleanReply() {
+            getDataStore().remove(REPLY_KEY);
         }
 
-        protected void	handleRejectProposal(ACLMessage cfp, ACLMessage propose, ACLMessage reject) {
-            // TODO handle reject proposal of product
-        }
+        class RouteRequestContractNetInit extends ContractNetInitiator {
+            private Itinerary itinerary;
+            private Production requestProduction;
+            private String Carried_CFP_KEY, Carried_REPLY_KEY;
 
-    }
-
-    class RouteRequestContractNetInit extends ContractNetInitiator {
-        private Itinerary itinerary;
-
-        public RouteRequestContractNetInit(Agent a, ACLMessage cfp, Itinerary itinerary) {
-            super(a, cfp);
-            this.itinerary = itinerary;
-        }
-
-        protected Vector prepareCfps(ACLMessage cfp) {
-
-            cfp.setContent(String.valueOf(itinerary));
-            cfp.setProtocol("route-request");
-            for (AID company : companies) {
-                cfp.addReceiver(company);
+            public RouteRequestContractNetInit(Agent a, ACLMessage cfp, Itinerary itinerary, Production production, String CFP_KEY, String REPLY_CFP) {
+                super(a, cfp);
+                this.itinerary = itinerary;
+                this.requestProduction = production;
+                this.Carried_CFP_KEY = CFP_KEY;
+                this.Carried_REPLY_KEY = REPLY_CFP;
             }
-            Vector v = new Vector();
-            v.add(cfp);
-            return v;
-        }
 
-        protected void handleAllResponses(Vector responses, Vector acceptances) {
+            protected Vector prepareCfps(ACLMessage cfp) {
 
-            System.out.println("got " + responses.size() + " responses!");
-            List<Double> prices = Arrays.asList(new Double[itinerary.getSize()]);
-            Collections.fill(prices, Double.MAX_VALUE);
-            List<Integer> companiesResponseIndex = Arrays.asList(new Integer[itinerary.getSize()]);
-            List<Double> offeredPrices;
-            for (int i = 0; i < responses.size(); i++) {
-                ACLMessage response = (ACLMessage) responses.get(i);
-                if (response.getPerformative() == ACLMessage.PROPOSE) {
-                    offeredPrices = Arrays.asList(response.getContent().split(",")).stream().map(Double::parseDouble).collect(Collectors.toList());
-                    for (int j = 0; j < offeredPrices.size(); j++) {
-                        if (offeredPrices.get(j) < prices.get(j)) {
-                            prices.set(j, offeredPrices.get(j));
-                            companiesResponseIndex.set(j, i);
+                cfp.setContent(String.valueOf(itinerary));
+                cfp.setProtocol("route-request");
+                getCompanies();
+                for (AID company : companies) {
+                    cfp.addReceiver(company);
+                }
+                Vector v = new Vector();
+                v.add(cfp);
+                return v;
+            }
+
+            protected void handleAllResponses(Vector responses, Vector acceptances) {
+
+                System.out.println("got " + responses.size() + " responses!");
+                List<Double> prices = Arrays.asList(new Double[itinerary.getSize()]);
+                Collections.fill(prices, Double.MAX_VALUE);
+                List<Integer> companiesResponseIndex = Arrays.asList(new Integer[itinerary.getSize()]);
+                List<Double> offeredPrices;
+                for (int i = 0; i < responses.size(); i++) {
+                    ACLMessage response = (ACLMessage) responses.get(i);
+                    if (response.getPerformative() == ACLMessage.PROPOSE) {
+                        offeredPrices = Arrays.asList(response.getContent().split(",")).stream().map(Double::parseDouble).collect(Collectors.toList());
+                        for (int j = 0; j < offeredPrices.size(); j++) {
+                            if (offeredPrices.get(j) < prices.get(j)) {
+                                prices.set(j, offeredPrices.get(j));
+                                companiesResponseIndex.set(j, i);
+                            }
                         }
+                        System.out.println(response.getUserDefinedParameter("log"));
                     }
-                    System.out.println(response.getUserDefinedParameter("log"));
-
                 }
 
+                //Add companies with possibly accepted proposals to a set with their respective task
+                Set<Integer> companiesWithAcceptedProposal = new HashSet<>();
+                HashMap<ACLMessage, List<Integer>> proposalsByCompany = new HashMap<>();
+                for (int i = 0; i < prices.size(); i++) {
+                    if (prices.get(i) == Double.MAX_VALUE) {
+                        throw new RuntimeException("No company could offer a price for the route");
+                    }
+                    int companyIndex = companiesResponseIndex.get(i);
+                    ACLMessage companyMessage = (ACLMessage) responses.get(companyIndex);
+                    if (!proposalsByCompany.containsKey(companyMessage)) {
+                        proposalsByCompany.put(companyMessage, new ArrayList<>());
+                    }
+                    proposalsByCompany.get(companyMessage).add(i);
+                    companiesWithAcceptedProposal.add(companyIndex);
+                }
+
+                //Create the accept proposal messages
+                //Content is the parts of the path they will be handling
+                for (ACLMessage companyMessage : proposalsByCompany.keySet()) {
+                    ACLMessage msg = companyMessage.createReply();
+                    msg.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+                    msg.setContent(proposalsByCompany.get(companyMessage).stream().map(Object::toString).collect(Collectors.joining(",")));
+                    acceptedProposals.add(msg);
+                }
+
+                // Reject proposals
+                for (int i = 0; i < responses.size(); i++) {
+                    if (!companiesWithAcceptedProposal.contains(i)) {
+                        ACLMessage response = (ACLMessage) responses.get(i);
+                        ACLMessage msg = response.createReply();
+                        msg.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                        System.out.println(myAgent.getLocalName() + " rejected proposal from " + response.getSender().getLocalName() + " for conversation id" + response.getConversationId());
+                        acceptances.add(msg);
+                    }
+                }
+
+                //Transmit the final price to the client
+                ACLMessage originalCFP = (ACLMessage) getDataStore().get(Carried_CFP_KEY);
+                ACLMessage replyCFP = originalCFP.createReply();
+                replyCFP.setPerformative(ACLMessage.PROPOSE);
+                double finalPrice = calculatePrice(prices);
+                replyCFP.setContent(Double.toString(finalPrice));
+                getDataStore().put(Carried_REPLY_KEY, replyCFP);
             }
-            for (int i = 0; i < prices.size(); i++) {
-                if (prices.get(i) == Double.MAX_VALUE) {
-                    throw new RuntimeException("No company could offer a price for the route");
+
+            protected void handleAllResultNotifications(Vector resultNotifications) {
+                System.out.println("got " + resultNotifications.size() + " result notifs!");
+            }
+
+            private double calculatePrice(List<Double> prices) {
+                double totalRoutePrice = 0;
+                double productionMult = requestProduction.getPriceMult();
+                for (Double price : prices) {
+                    totalRoutePrice += price;
                 }
-                ACLMessage response = (ACLMessage) responses.get(companiesResponseIndex.get(i));
-                ACLMessage msg = response.createReply();
-                System.out.println(myAgent.getName() + " got an answer from " + response.getSender().getName() + " with content " + response.getContent());
-                msg.setPerformative(ACLMessage.ACCEPT_PROPOSAL); // OR NOT!
-                msg.setContent(Integer.toString(i));
-                acceptances.add(msg);
+                double finalPrice = totalRoutePrice * productionMult;
+                return finalPrice;
             }
         }
 
-        protected void handleAllResultNotifications(Vector resultNotifications) {
-            System.out.println("got " + resultNotifications.size() + " result notifs!");
+        class RouteRequestConfirmationContractNetInit extends Behaviour {
+            private boolean accept;
+            private boolean isDone = false;
+            private String Carried_REPLY_KEY;
+
+            public RouteRequestConfirmationContractNetInit(Agent a, boolean accept) {
+                super(a);
+                this.accept = accept;
+            }
+
+            @Override
+            public void action() {
+                cleanReply();
+                for (ACLMessage acceptedProposal : acceptedProposals) {
+                    if (accept) {
+                        acceptedProposal.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+                    } else {
+                        acceptedProposal.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                    }
+                    myAgent.send(acceptedProposal);
+                    isDone = true;
+                }
+            }
+
+            @Override
+            public boolean done() {
+                return isDone;
+            }
         }
     }
+
 }

@@ -10,7 +10,7 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 public class CompanyCreator implements CreatorInterface {
-    private final static Random random = new Random();
+    private final static Random random = new Random(1);
     private final int NO_GLOBAL = 3;
     private final int NO_REGIONAL = 5;
     private final int NO_SHIPS = NO_GLOBAL;

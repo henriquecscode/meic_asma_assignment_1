@@ -17,8 +17,10 @@ import jade.proto.SSContractNetResponder;
 import jade.proto.SSResponderDispatcher;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class CompanyAgent extends Agent {
 
@@ -46,7 +48,7 @@ public class CompanyAgent extends Agent {
         // RequestPrice requestPrice = new RequestPrice(request);
         // List<Integer> prices = requestPrice.getBestPathPrices(company);
         // TODO: send the prices to the client after the client sends the request
-        
+
         registerAgent();
         addResponderBehaviour();
     }
@@ -122,10 +124,11 @@ public class CompanyAgent extends Agent {
             ACLMessage result = accept.createReply();
             result.setPerformative(ACLMessage.INFORM);
             result.setContent("this is the result");
-
-            Integer itineraryRouteIndex = Integer.valueOf(accept.getContent());
-            Location location1 = request.getRoute().get(itineraryRouteIndex);
-            Location location2 = request.getRoute().get(itineraryRouteIndex + 1);
+            List<Integer> itinerary = new ArrayList<>();
+            //split and parse the content
+            String content = accept.getContent();
+            List<String> itineraryList = Arrays.asList(content.split(","));
+            itinerary = itineraryList.stream().map(Integer::valueOf).collect(Collectors.toList());
             //need to do some handling to coordinate with the other companies
             return result;
         }

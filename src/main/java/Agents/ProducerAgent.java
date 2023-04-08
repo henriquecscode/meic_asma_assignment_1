@@ -221,7 +221,8 @@ public class ProducerAgent extends Agent {
                 for (ACLMessage companyMessage : proposalsByCompany.keySet()) {
                     ACLMessage msg = companyMessage.createReply();
                     msg.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-                    msg.setContent(proposalsByCompany.get(companyMessage).stream().map(Object::toString).collect(Collectors.joining(",")));
+                    String replyContent = proposalsByCompany.get(companyMessage).stream().map(Object::toString).collect(Collectors.joining(","));
+                    msg.setContent(replyContent);
                     acceptedProposals.add(msg);
                 }
 

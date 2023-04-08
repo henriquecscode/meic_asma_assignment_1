@@ -25,6 +25,10 @@ public class Hub {
         vehicles.add(vehicle);
     }
 
+    public List<Vehicle> getVehicles() {
+        return vehicles;
+    }
+
     public Company getCompany() {
         return company;
     }

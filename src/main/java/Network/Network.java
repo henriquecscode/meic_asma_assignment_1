@@ -7,6 +7,7 @@ import Network.Location.Port;
 import Network.Route.InternationalRoute;
 import Network.Route.NeighbourhoodRoute;
 import Network.Route.RegionalRoute;
+import Network.Route.Route;
 
 
 import java.util.ArrayList;
@@ -135,7 +136,7 @@ public class Network {
         return this.housesByLocation.get(portIndex).get(cityIndex).get(houseIndex);
     }
 
-    public Location getLocation(String name){
+    public Location getLocation(String name) {
         List<Integer> ints = Arrays.stream(name.split("-"))
                 .map(Integer::parseInt)
                 .collect(Collectors.toList());
@@ -181,4 +182,78 @@ public class Network {
     public List<List<List<NeighbourhoodRoute>>> getNeighbourhoodRoutes() {
         return neighbourhoodRoutes;
     }
+
+    private Route getDirectedInternationalRoute(Location from, Location to) {
+        if (from instanceof Port && to instanceof Port) {
+            for (InternationalRoute route : this.internationalRoutes) {
+                if (route.getFrom().equals(from) && route.getTo().equals(to)) {
+                    return route;
+                } else if (route.getFrom().equals(to) && route.getTo().equals(from)) {
+                    return route;
+                }
+            }
+        }
+        return null;
+    }
+
+    private RegionalRoute getDirectedRegionalRoute(Location from, Location to) {
+        Location port = null;
+        Location city = null;
+        if (from instanceof Port && to instanceof City) {
+            port = from;
+            city = to;
+        } else if (from instanceof City && to instanceof Port) {
+            port = to;
+            city = from;
+        }
+        int portIndex = this.ports.indexOf(port);
+        List<RegionalRoute> routes = this.regionalRoutes.get(portIndex);
+        for (RegionalRoute route : routes) {
+            if (route.getFrom().equals(port) && route.getTo().equals(city)) {
+                return route;
+            }
+        }
+
+
+        return null;
+    }
+
+    private NeighbourhoodRoute getDirectedNeighbourhoodRoute(Location to, Location from) {
+        Location city = null;
+        Location house = null;
+        if (from instanceof City && to instanceof House) {
+            city = from;
+            house = to;
+        } else if (from instanceof House && to instanceof City) {
+            city = to;
+            house = from;
+        }
+        int portIndex = this.ports.indexOf(((City) city).getPort());
+        int cityIndex = this.citiesByLocation.get(portIndex).indexOf(city);
+        List<NeighbourhoodRoute> routes = this.neighbourhoodRoutes.get(portIndex).get(cityIndex);
+        for (NeighbourhoodRoute route : routes) {
+            if (route.getFrom().equals(city) && route.getTo().equals(house)) {
+                return route;
+            }
+        }
+        return null;
+
+    }
+
+    public Route getRoute(Location from, Location to) {
+        Route route = null;
+        if (from instanceof Port && to instanceof Port) {
+            route = this.getDirectedInternationalRoute(from, to);
+        } else if (from instanceof Port || to instanceof Port) {
+            route = this.getDirectedRegionalRoute(from, to);
+        } else if (from instanceof City || to instanceof City) {
+            route = this.getDirectedNeighbourhoodRoute(from, to);
+        }
+        if (route == null) {
+            throw new RuntimeException("No route found");
+        }
+        return route;
+    }
 }
+
+

@@ -8,22 +8,25 @@ public class Dispatch {
     private static String SEP = ",";
     private Location start;
     private Location end;
-    private int loadedOn = -1;
-    private int holdingTime = -1; //time until a vehicle loads it
-    private int dispatchedOn = -1;
-    private int idleTime = -1; // time until the vehicle starts moving
-    private int arrivedOn = -1;
-    private int travelTime = -1; // travel time (deterministic from vehicle speed and distance)
+    private long loadedOn = -1;
+    private long holdingTime = -1; //time until a vehicle loads it
+    private long dispatchedOn = -1;
+    private long idleTime = -1; // time until the vehicle starts moving
+    private long arrivedOn = -1;
+    private long travelTime = -1; // travel time (deterministic from vehicle speed and distance)
     private final String companyName;
     private String vehicleName = "";
     private int vehicleCapacity = -1; // vehicle capacity
-    private int vehicleOccupiedSpace = -1; // quantity * volume at time of dispatch
+    private int vehicleFilledUpCargo = -1; // quantity * volume at time of dispatch
     private int cargoOccupancy = -1; // occupied space / capacity
 
-    public Dispatch(Location start, Location end, String companyName) {
+    private final int requestStage;
+
+    public Dispatch(Location start, Location end, String companyName, int routeStage) {
         this.start = start;
         this.end = end;
         this.companyName = companyName;
+        this.requestStage = routeStage;
     }
 
     public Dispatch(Network network, String dispatch) {
@@ -39,8 +42,9 @@ public class Dispatch {
         this.companyName = dispatchInfo[8];
         this.vehicleName = dispatchInfo[9];
         this.vehicleCapacity = Integer.parseInt(dispatchInfo[10]);
-        this.vehicleOccupiedSpace = Integer.parseInt(dispatchInfo[11]);
+        this.vehicleFilledUpCargo = Integer.parseInt(dispatchInfo[11]);
         this.cargoOccupancy = Integer.parseInt(dispatchInfo[12]);
+        this.requestStage = Integer.parseInt(dispatchInfo[13]);
     }
 
     public Location getStart() {
@@ -59,51 +63,51 @@ public class Dispatch {
         this.end = end;
     }
 
-    public int getLoadedOn() {
+    public long getLoadedOn() {
         return loadedOn;
     }
 
-    public void setLoadedOn(int loadedOn) {
+    public void setLoadedOn(long loadedOn) {
         this.loadedOn = loadedOn;
     }
 
-    public int getHoldingTime() {
+    public long getHoldingTime() {
         return holdingTime;
     }
 
-    public void setHoldingTime(int holdingTime) {
+    public void setHoldingTime(long holdingTime) {
         this.holdingTime = holdingTime;
     }
 
-    public int getDispatchedOn() {
+    public long getDispatchedOn() {
         return dispatchedOn;
     }
 
-    public void setDispatchedOn(int dispatchedOn) {
+    public void setDispatchedOn(long dispatchedOn) {
         this.dispatchedOn = dispatchedOn;
     }
 
-    public int getIdleTime() {
+    public long getIdleTime() {
         return idleTime;
     }
 
-    public void setIdleTime(int idleTime) {
+    public void setIdleTime(long idleTime) {
         this.idleTime = idleTime;
     }
 
-    public int getArrivedOn() {
+    public long getArrivedOn() {
         return arrivedOn;
     }
 
-    public void setArrivedOn(int arrivedOn) {
+    public void setArrivedOn(long arrivedOn) {
         this.arrivedOn = arrivedOn;
     }
 
-    public int getTravelTime() {
+    public long getTravelTime() {
         return travelTime;
     }
 
-    public void setTravelTime(int travelTime) {
+    public void setTravelTime(long travelTime) {
         this.travelTime = travelTime;
     }
 
@@ -114,7 +118,7 @@ public class Dispatch {
 
     public void setVehicle(Vehicle vehicle) {
         this.vehicleName = vehicle.getName();
-        this.vehicleCapacity = vehicle.getCargo();
+        this.vehicleCapacity = vehicle.getCargoCapacity();
     }
 
     public String getVehicleName() {
@@ -125,21 +129,25 @@ public class Dispatch {
         return vehicleCapacity;
     }
 
-    public int getVehicleOccupiedSpace() {
-        return vehicleOccupiedSpace;
+    public int getVehicleFilledUpCargo() {
+        return vehicleFilledUpCargo;
     }
 
-    public void setVehicleOccupiedSpace(int vehicleOccupiedSpace) {
-        this.vehicleOccupiedSpace = vehicleOccupiedSpace;
-        this.cargoOccupancy = vehicleOccupiedSpace / vehicleCapacity;
+    public void setVehicleFilledUpCargo(int vehicleFilledUpCargo) {
+        this.vehicleFilledUpCargo = vehicleFilledUpCargo;
+        this.cargoOccupancy = vehicleFilledUpCargo / vehicleCapacity;
     }
 
     public int getCargoOccupancy() {
         return cargoOccupancy;
     }
 
+    public int getRequestStage() {
+        return requestStage;
+    }
+
     @Override
     public String toString() {
-        return start.getName() + SEP + end.getName() + SEP + loadedOn + SEP + holdingTime + SEP + dispatchedOn + SEP + idleTime + SEP + arrivedOn + SEP + travelTime + SEP + companyName + SEP + vehicleName + SEP + vehicleCapacity + SEP + vehicleOccupiedSpace + SEP + cargoOccupancy;
+        return start.getName() + SEP + end.getName() + SEP + loadedOn + SEP + holdingTime + SEP + dispatchedOn + SEP + idleTime + SEP + arrivedOn + SEP + travelTime + SEP + companyName + SEP + vehicleName + SEP + vehicleCapacity + SEP + vehicleFilledUpCargo + SEP + cargoOccupancy + SEP + requestStage;
     }
 }

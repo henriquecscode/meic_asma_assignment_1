@@ -8,6 +8,7 @@ import Network.Location.House;
 import Network.Location.Location;
 import Producer.Producer;
 import Producer.Production;
+import World.World;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -108,7 +109,7 @@ public class ProducerAgent extends Agent {
     }
 
     class ProductRequestContractNetResponder extends SSContractNetResponder {
-
+        FulfilledRequest fulfilledRequest;
         List<ACLMessage> acceptedProposals = new ArrayList<>();
         Request request;
         Production production;
@@ -184,7 +185,7 @@ public class ProducerAgent extends Agent {
 
             //            public void fulfillRequest(Map<ACLMessage, List<Integer>> proposalsByCompany) {
             public boolean fulfillRequest(List<Double> prices, List<ACLMessage> responses) {
-                FulfilledRequest fulfilledRequest = new FulfilledRequest(request);
+                fulfilledRequest = new FulfilledRequest(request);
                 List<Dispatch> dispatches = new ArrayList<>();
                 List<Location> locations = request.getRoute();
                 for (int i = 0; i < prices.size(); i++) {
@@ -192,7 +193,7 @@ public class ProducerAgent extends Agent {
                         return false;
                     }
                     ACLMessage response = responses.get(i);
-                    Dispatch dispatch = new Dispatch(locations.get(i), locations.get(i + 1), response.getSender().getLocalName());
+                    Dispatch dispatch = new Dispatch(locations.get(i), locations.get(i + 1), response.getSender().getLocalName(), i);
                     dispatches.add(dispatch);
                 }
                 fulfilledRequest.setDispatches(dispatches);
@@ -200,8 +201,6 @@ public class ProducerAgent extends Agent {
                 Set<ACLMessage> acceptedProposalsSet = responses.stream().collect(Collectors.toSet());
                 for (ACLMessage response : acceptedProposalsSet) {
                     ACLMessage reply = response.createReply();
-                    reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-                    reply.setContent(content);
                     acceptedProposals.add(reply);
                 }
 
@@ -292,7 +291,9 @@ public class ProducerAgent extends Agent {
                 cleanReply();
                 for (ACLMessage acceptedProposal : acceptedProposals) {
                     if (accept) {
+                        fulfilledRequest.setStartedOn(World.getTime());
                         acceptedProposal.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+                        acceptedProposal.setContent(fulfilledRequest.toString());
                     } else {
                         acceptedProposal.setPerformative(ACLMessage.REJECT_PROPOSAL);
                     }

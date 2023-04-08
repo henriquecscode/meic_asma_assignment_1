@@ -232,6 +232,213 @@ public class Company {
             throw new IllegalArgumentException("Location start is not a valid type");
         }
     }
+
+    public Hub findLocationHub(Location location) {
+        if (location instanceof House) {
+            return null;
+        } else if (location instanceof City) {
+            for (RegionHub regionHub : regionHubs) {
+                if (regionHub.getLocation() == location) {
+                    return regionHub;
+                }
+            }
+        } else if (location instanceof Port) {
+            for (GlobalHub globalHub : globalHubs) {
+                if (globalHub.getLocation() == location) {
+                    return globalHub;
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<List<Hub>> findLocationIndirectHubs(Location location) {
+        List<Hub> regionalHubs = new ArrayList<>();
+        List<Hub> globalHubs = new ArrayList<>();
+        if (location instanceof House) {
+            Hub hub = findLocationHub(((House) location).getCity());
+            if (hub != null) {
+                regionalHubs.add(hub);
+            }
+        } else if (location instanceof City) {
+            Hub hub = findLocationHub(((City) location).getPort());
+            if (hub != null) {
+                globalHubs.add(hub);
+            }
+        } else if (location instanceof Port) {
+            for (Location port : location.getUpperLocations()) {
+                Hub hub = findLocationHub(port);
+                if (hub != null) {
+                    globalHubs.add(hub);
+                }
+            }
+            for (Location city : location.getLowerLocations()) {
+                Hub hub = findLocationHub(city);
+                if (hub != null) {
+                    regionalHubs.add(hub);
+                }
+            }
+        }
+        return List.of(regionalHubs, globalHubs);
+    }
+
+    private RouteType getRouteType(Location start, Location end) {
+        if (start instanceof Port && end instanceof Port) {
+            return RouteType.International;
+        } else if ((start instanceof Port && end instanceof City) || (start instanceof City && end instanceof Port)) {
+            return RouteType.Regional;
+        } else if ((start instanceof City && end instanceof House) || (start instanceof House && end instanceof House)) {
+            return RouteType.Neighbour;
+        }
+        throw new IllegalArgumentException("Invalid route type");
+    }
+
+
+    private Vehicle getFittingVehicleInLocation(List<Vehicle> vehicles, Location location, int cargoSize) {
+        for (Vehicle vehicle : vehicles) {
+            if (vehicle.getLocation() == location && vehicle.canFillUpCargo(cargoSize)) {
+                return vehicle;
+            }
+        }
+        return null;
+    }
+
+    private Van findVehicleForNeighbourhoodRoute(Location start, Location end, int cargoSize) {
+        RegionHub hub;
+        if (start instanceof House) {
+            hub = (RegionHub) findLocationHub(((House) start).getCity());
+        } else {
+            hub = (RegionHub) findLocationHub(start);
+        }
+        if (hub == null) {
+            throw new IllegalArgumentException("Company got contract for route that it does not control");
+        }
+        List<Van> hubVans = hub.getVans();
+        List<Van> idlingVans = vans.getIdlingVehicles();
+        //intersect both
+        List<Vehicle> availableVans = idlingVans.stream().filter(hubVans::contains).collect(Collectors.toList());
+        return (Van) getFittingVehicleInLocation(availableVans, start, cargoSize);
+    }
+
+
+    private Semi findSemiInHub(Hub hub, int cargoSize) {
+        List<Semi> hubSemis;
+        if (hub instanceof RegionHub) {
+            hubSemis = ((RegionHub) hub).getSemis();
+        } else {
+            hubSemis = ((GlobalHub) hub).getSemis();
+        }
+        List<Semi> idlingSemis = semis.getIdlingVehicles();
+        //intersect both
+        List<Vehicle> availableSemis = idlingSemis.stream().filter(hubSemis::contains).collect(Collectors.toList());
+        return (Semi) getFittingVehicleInLocation(availableSemis, hub.getLocation(), cargoSize);
+    }
+
+    private Semi findVehicleForRegionalRoute(Location start, Location end, int cargoSize) {
+        RegionHub regionHub;
+        GlobalHub globalHub;
+        Semi semi;
+        if (start instanceof City) {
+            regionHub = (RegionHub) findLocationHub(start);
+            globalHub = (GlobalHub) findLocationHub(((City) start).getPort());
+        } else {
+            regionHub = (RegionHub) findLocationHub(end);
+            globalHub = (GlobalHub) findLocationHub(((City) end).getPort());
+        }
+        if (regionHub != null) {
+            semi = findSemiInHub(regionHub, cargoSize);
+            if (semi != null) {
+                return semi;
+            }
+        }
+        if (globalHub != null) {
+            semi = findSemiInHub(globalHub, cargoSize);
+            if (semi != null) {
+                return semi;
+            }
+        }
+        return null;
+    }
+
+    private Ship findShipForPort(GlobalHub hub, int cargoSize) {
+        List<Ship> hubShips = hub.getShips();
+        List<Ship> idlingShips = ships.getIdlingVehicles();
+        //intersect both
+        List<Vehicle> availableShips = idlingShips.stream().filter(hubShips::contains).collect(Collectors.toList());
+        return (Ship) getFittingVehicleInLocation(availableShips, hub.getLocation(), cargoSize);
+    }
+
+    private Ship findShipInPort(GlobalHub hub, int cargoSize) {
+        List<Ship> hubShips = hub.getShips();
+        List<Ship> idlingShips = ships.getIdlingVehicles();
+        //intersect both
+        List<Ship> availableShips = idlingShips.stream().filter(hubShips::contains).collect(Collectors.toList());
+        if (availableShips.isEmpty()) {
+            return null;
+        } else {
+            for (Ship ship : availableShips) {
+                if (ship.canFillUpCargo(cargoSize)) {
+                    if (ship.getLocation().equals(hub.getLocation())) {
+                        return ship;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Ship findVehicleForInternationalRoute(Location start, Location end, int cargoSize) {
+        GlobalHub hub;
+        hub = (GlobalHub) findLocationHub(start);
+        Ship ship = null;
+        if (hub != null) {
+            ship = findShipInPort(hub, cargoSize);
+
+            if (ship != null) {
+                return ship;
+            }
+        }
+        for (Location port : start.getUpperLocations()) {
+            hub = (GlobalHub) findLocationHub(port);
+            if (hub != null) {
+                ship = findShipInPort(hub, cargoSize);
+                if (ship != null) {
+                    return ship;
+                }
+            }
+        }
+        return null;
+    }
+
+    public Vehicle findVehicle(Location start, Location end, int cargoSize) {
+        RouteType routeType = getRouteType(start, end);
+        if (routeType == RouteType.Neighbour) {
+            return findVehicleForNeighbourhoodRoute(start, end, cargoSize);
+        } else if (routeType == RouteType.Regional) {
+            return findVehicleForRegionalRoute(start, end, cargoSize);
+        } else if (routeType == RouteType.International) {
+            return findVehicleForInternationalRoute(start, end, cargoSize);
+        }
+        throw new IllegalArgumentException("Invalid route type");
+    }
+
+    public void dispatchVehicle(Vehicle vehicle) {
+        if (vehicle instanceof Van) {
+            vans.updateVehicle((Van) vehicle);
+        } else if (vehicle instanceof Semi) {
+            semis.updateVehicle((Semi) vehicle);
+        } else if (vehicle instanceof Ship) {
+            ships.updateVehicle((Ship) vehicle);
+        }
+    }
+
+}
+
+enum RouteType {
+    Neighbour,
+    Regional,
+    International
 }
 
 class CompanyTypeVehicles<V extends Vehicle> {

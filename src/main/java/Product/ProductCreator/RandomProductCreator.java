@@ -8,7 +8,7 @@ import utils.CreatorInterface;
 import java.util.Random;
 
 public class RandomProductCreator extends ProductCreator implements CreatorInterface {
-    private final static Random random = new Random();
+    private final static Random random = new Random(1);
     private static int MEAN_VOLUME = 20;
     private static int MEAN_BASE_PRICE = 10;
     private static double STD_VOLUME = 5;

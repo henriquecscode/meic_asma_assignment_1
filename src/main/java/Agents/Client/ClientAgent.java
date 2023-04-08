@@ -62,7 +62,7 @@ public class ClientAgent extends Agent {
     private List<DFAgentDescription> makeRequest(HashMap<String, List<DFAgentDescription>> productProducers) {
         System.out.println("Client-agent " + getAID().getName() + " is making a request.");
         List<String> productKeys = new ArrayList<>(productProducers.keySet());
-        Random r = new Random();
+        Random r = new Random(1);
         String randomKey = productKeys.get(r.nextInt(productKeys.size()));
         List<DFAgentDescription> producers = productProducers.get(randomKey);
 

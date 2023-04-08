@@ -87,7 +87,7 @@ public class NetworkCreator implements CreatorInterface {
 class DistanceCreator {
     private int mean;
     private double standardDeviation;
-    private final static Random random = new Random();
+    private final static Random random = new Random(1);
 
     public DistanceCreator(int mean, double standardDeviation) {
         this.mean = mean;

@@ -80,7 +80,7 @@ public class ProducerAgent extends Agent {
     }
 
     public void testProducerRequest() {
-        Random random = new Random();
+        Random random = new Random(1);
         List<House> houses = producer.network.getHouses();
         House house = houses.get(random.nextInt(houses.size()));
 

@@ -9,6 +9,9 @@ import Company.Hub;
 
 public class Vehicle {
 
+    public static int vehicleId = 0;
+    private final int id;
+    private final String name;
     public VehicleSeed seed;
     public Company company;
     private Hub hub = null;
@@ -20,6 +23,8 @@ public class Vehicle {
 
 
     Vehicle(Company company, Location location, VehicleSeed vehicleSeed) {
+        this.id = vehicleId++;
+        this.name = "Vehicle " + this.id;
         this.seed = vehicleSeed;
         this.company = company;
         this.cargo = vehicleSeed.getCargo();
@@ -27,6 +32,10 @@ public class Vehicle {
         this.costPerMile = vehicleSeed.getCostPerMile();
         this.upkeep = vehicleSeed.getUpkeep();
         this.state = new Idle(this, location);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public int getCargo() {

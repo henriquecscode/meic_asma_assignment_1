@@ -4,6 +4,7 @@ package Agents.Company;
 import Company.Company;
 import Network.Location.House;
 import Company.Request;
+import Company.FulfilledRequest;
 import Network.Location.Location;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -127,8 +128,7 @@ public class CompanyAgent extends Agent {
             List<Integer> itinerary = new ArrayList<>();
             //split and parse the content
             String content = accept.getContent();
-            List<String> itineraryList = Arrays.asList(content.split(","));
-            itinerary = itineraryList.stream().map(Integer::valueOf).collect(Collectors.toList());
+            FulfilledRequest fulfilledRequest = new FulfilledRequest(company.network, content);
             //need to do some handling to coordinate with the other companies
             return result;
         }

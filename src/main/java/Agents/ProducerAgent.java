@@ -1,6 +1,8 @@
 package Agents;
 
 
+import Company.Dispatch;
+import Company.FulfilledRequest;
 import Company.Request;
 import Network.Location.House;
 import Network.Location.Location;
@@ -178,13 +180,54 @@ public class ProducerAgent extends Agent {
                 return v;
             }
 
+//            fullFilRequest(proposalsByCompany, responses);
+
+            //            public void fulfillRequest(Map<ACLMessage, List<Integer>> proposalsByCompany) {
+            public boolean fulfillRequest(List<Double> prices, List<ACLMessage> responses) {
+                FulfilledRequest fulfilledRequest = new FulfilledRequest(request);
+                List<Dispatch> dispatches = new ArrayList<>();
+                List<Location> locations = request.getRoute();
+                for (int i = 0; i < prices.size(); i++) {
+                    if (prices.get(i) == Double.MAX_VALUE) {
+                        return false;
+                    }
+                    ACLMessage response = responses.get(i);
+                    Dispatch dispatch = new Dispatch(locations.get(i), locations.get(i + 1), response.getSender().getLocalName());
+                    dispatches.add(dispatch);
+                }
+                fulfilledRequest.setDispatches(dispatches);
+                String content = fulfilledRequest.toString();
+                Set<ACLMessage> acceptedProposalsSet = responses.stream().collect(Collectors.toSet());
+                for (ACLMessage response : acceptedProposalsSet) {
+                    ACLMessage reply = response.createReply();
+                    reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
+                    reply.setContent(content);
+                    acceptedProposals.add(reply);
+                }
+
+                return true;
+            }
+
+            public void rejectProposals(List<ACLMessage> responses, List<ACLMessage> acceptedProposals, List<ACLMessage> acceptances) {
+                Set<ACLMessage> acceptedProposalsSet = acceptedProposals.stream().collect(Collectors.toSet());
+
+                for (ACLMessage response : responses) {
+                    if (!acceptedProposalsSet.contains(response)) {
+                        System.out.println(myAgent.getLocalName() + " rejected proposal from " + response.getSender().getLocalName() + " for conversation id" + response.getConversationId());
+                        ACLMessage reply = response.createReply();
+                        reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                        acceptances.add(reply);
+                    }
+                }
+            }
+
             protected void handleAllResponses(Vector responses, Vector acceptances) {
 
                 System.out.println("got " + responses.size() + " responses!");
-                int numberRoutes = request.getRoute().size() -1;
+                int numberRoutes = request.getRoute().size() - 1;
                 List<Double> prices = Arrays.asList(new Double[numberRoutes]);
                 Collections.fill(prices, Double.MAX_VALUE);
-                List<Integer> companiesResponseIndex = Arrays.asList(new Integer[numberRoutes]);
+                List<ACLMessage> companiesMessageByRoute = Arrays.asList(new ACLMessage[numberRoutes]);
                 List<Double> offeredPrices;
                 for (int i = 0; i < responses.size(); i++) {
                     ACLMessage response = (ACLMessage) responses.get(i);
@@ -193,7 +236,8 @@ public class ProducerAgent extends Agent {
                         for (int j = 0; j < offeredPrices.size(); j++) {
                             if (offeredPrices.get(j) < prices.get(j)) {
                                 prices.set(j, offeredPrices.get(j));
-                                companiesResponseIndex.set(j, i);
+
+                                companiesMessageByRoute.set(j, response);
                             }
                         }
                         System.out.println(response.getUserDefinedParameter("log"));
@@ -201,48 +245,21 @@ public class ProducerAgent extends Agent {
                 }
 
                 //Add companies with possibly accepted proposals to a set with their respective task
-                Set<Integer> companiesWithAcceptedProposal = new HashSet<>();
-                HashMap<ACLMessage, List<Integer>> proposalsByCompany = new HashMap<>();
-                for (int i = 0; i < prices.size(); i++) {
-                    if (prices.get(i) == Double.MAX_VALUE) {
-                        throw new RuntimeException("No company could offer a price for the route");
-                    }
-                    int companyIndex = companiesResponseIndex.get(i);
-                    ACLMessage companyMessage = (ACLMessage) responses.get(companyIndex);
-                    if (!proposalsByCompany.containsKey(companyMessage)) {
-                        proposalsByCompany.put(companyMessage, new ArrayList<>());
-                    }
-                    proposalsByCompany.get(companyMessage).add(i);
-                    companiesWithAcceptedProposal.add(companyIndex);
-                }
+                boolean canFulfillRequest = fulfillRequest(prices, companiesMessageByRoute);
+                rejectProposals(responses, companiesMessageByRoute, acceptances);
 
-                //Create the accept proposal messages
-                //Content is the parts of the path they will be handling
-                for (ACLMessage companyMessage : proposalsByCompany.keySet()) {
-                    ACLMessage msg = companyMessage.createReply();
-                    msg.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
-                    String replyContent = proposalsByCompany.get(companyMessage).stream().map(Object::toString).collect(Collectors.joining(","));
-                    msg.setContent(replyContent);
-                    acceptedProposals.add(msg);
-                }
-
-                // Reject proposals
-                for (int i = 0; i < responses.size(); i++) {
-                    if (!companiesWithAcceptedProposal.contains(i)) {
-                        ACLMessage response = (ACLMessage) responses.get(i);
-                        ACLMessage msg = response.createReply();
-                        msg.setPerformative(ACLMessage.REJECT_PROPOSAL);
-                        System.out.println(myAgent.getLocalName() + " rejected proposal from " + response.getSender().getLocalName() + " for conversation id" + response.getConversationId());
-                        acceptances.add(msg);
-                    }
-                }
 
                 //Transmit the final price to the client
                 ACLMessage originalCFP = (ACLMessage) getDataStore().get(Carried_CFP_KEY);
                 ACLMessage replyCFP = originalCFP.createReply();
-                replyCFP.setPerformative(ACLMessage.PROPOSE);
-                double finalPrice = calculatePrice(prices);
-                replyCFP.setContent(Double.toString(finalPrice));
+                if (!canFulfillRequest) {
+                    replyCFP.setPerformative(ACLMessage.REFUSE);
+                    replyCFP.setContent("No route available");
+                } else {
+                    replyCFP.setPerformative(ACLMessage.PROPOSE);
+                    double finalPrice = calculatePrice(prices);
+                    replyCFP.setContent(Double.toString(finalPrice));
+                }
                 getDataStore().put(Carried_REPLY_KEY, replyCFP);
             }
 

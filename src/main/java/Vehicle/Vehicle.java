@@ -33,7 +33,7 @@ public class Vehicle {
         this.speed = vehicleSeed.getSpeed();
         this.costPerMile = vehicleSeed.getCostPerMile();
         this.upkeep = vehicleSeed.getUpkeep();
-        this.state = new Idle(this, location);
+        this.state = new Idle(location);
     }
 
     public String getName() {

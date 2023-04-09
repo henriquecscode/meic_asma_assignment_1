@@ -8,8 +8,8 @@ public class Finished extends State {
     private Route route;
     private Location location;
 
-    public Finished(Vehicle vehicle, Route route, Location location) {
-        super(vehicle);
+    public Finished(Route route, Location location) {
+        super();
         this.route = route;
         this.location = location;
     }

@@ -74,7 +74,7 @@ public class Company {
             Port shipLocation = network.getPorts().get(portIndex);
             Ship ship = new Ship(this, shipLocation, fleetSeed.getShipSeed());
             ships.add(ship);
-            Hub hub = globalHubsByLocation.get(portIndex);
+            GlobalHub hub = globalHubsByLocation.get(portIndex);
             hub.addVehicle(ship);
             ship.setHub(hub);
             ship.setLocation(shipLocation);
@@ -89,7 +89,7 @@ public class Company {
             Port port = network.getPorts().get(portIndex);
             Semi semi = new Semi(this, port, fleetSeed.getSemiSeed());
             semis.add(semi);
-            Hub hub = globalHubsByLocation.get(portIndex);
+            GlobalHub hub = globalHubsByLocation.get(portIndex);
             hub.addVehicle(semi);
             semi.setHub(hub);
             semi.setLocation(port);
@@ -102,7 +102,7 @@ public class Company {
             City cityLocation = network.getCitiesByLocation().get(port).get(city);
             Semi semi = new Semi(this, cityLocation, fleetSeed.getSemiSeed());
             semis.add(semi);
-            Hub hub = regionHubsByLocation.get(List.of(port, city));
+            RegionHub hub = regionHubsByLocation.get(List.of(port, city));
             hub.addVehicle(semi);
             semi.setHub(hub);
             semi.setLocation(cityLocation);
@@ -117,7 +117,7 @@ public class Company {
             City cityLocation = network.getCitiesByLocation().get(port).get(city);
             Van van = new Van(this, cityLocation, fleetSeed.getVanSeed());
             vans.add(van);
-            Hub hub = regionHubsByLocation.get(List.of(port, city));
+            RegionHub hub = regionHubsByLocation.get(List.of(port, city));
             hub.addVehicle(van);
             van.setHub(hub);
             van.setLocation(cityLocation);

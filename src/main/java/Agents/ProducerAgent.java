@@ -245,7 +245,6 @@ public class ProducerAgent extends Agent {
 
                 //Add companies with possibly accepted proposals to a set with their respective task
                 boolean canFulfillRequest = fulfillRequest(prices, companiesMessageByRoute);
-                rejectProposals(responses, companiesMessageByRoute, acceptances);
 
 
                 //Transmit the final price to the client
@@ -253,12 +252,15 @@ public class ProducerAgent extends Agent {
                 ACLMessage replyCFP = originalCFP.createReply();
                 if (!canFulfillRequest) {
                     replyCFP.setPerformative(ACLMessage.REFUSE);
+                    companiesMessageByRoute = new ArrayList<>();
                     replyCFP.setContent("No route available");
                 } else {
                     replyCFP.setPerformative(ACLMessage.PROPOSE);
                     double finalPrice = calculatePrice(prices);
                     replyCFP.setContent(Double.toString(finalPrice));
                 }
+
+                rejectProposals(responses, companiesMessageByRoute, acceptances);
                 getDataStore().put(Carried_REPLY_KEY, replyCFP);
             }
 

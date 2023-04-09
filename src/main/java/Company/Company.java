@@ -287,7 +287,7 @@ public class Company {
             return RouteType.International;
         } else if ((start instanceof Port && end instanceof City) || (start instanceof City && end instanceof Port)) {
             return RouteType.Regional;
-        } else if ((start instanceof City && end instanceof House) || (start instanceof House && end instanceof House)) {
+        } else if ((start instanceof City && end instanceof House) || (start instanceof House && end instanceof City)) {
             return RouteType.Neighbour;
         }
         throw new IllegalArgumentException("Invalid route type");

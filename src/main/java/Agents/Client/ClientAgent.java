@@ -94,7 +94,7 @@ public class ClientAgent extends Agent {
         }
 
         protected void handleAllResponses(Vector responses, Vector acceptances) {
-            int bestIndex = 0;
+            int bestIndex = -1;
             double bestPrice = Double.MAX_VALUE;
 
             // choose only the best (lowest) price
@@ -113,6 +113,10 @@ public class ClientAgent extends Agent {
             // accept proposal of responses[i] and reject all others
             for (int i = 0; i < responses.size(); i++) {
                 ACLMessage response = (ACLMessage) responses.get(i);
+                if (response.getPerformative() != ACLMessage.PROPOSE) {
+                    continue;
+                }
+
                 ACLMessage msg = response.createReply();
                 if (i == bestIndex) {
                     msg.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
@@ -120,6 +124,10 @@ public class ClientAgent extends Agent {
                     msg.setPerformative(ACLMessage.REJECT_PROPOSAL);
                 }
                 acceptances.add(msg);
+            }
+
+            if (bestIndex == -1) {
+                System.out.println("Client-agent " + getAID().getLocalName() + " did not get a suitable response from any producer.");
             }
         }
 

@@ -4,6 +4,7 @@ package Agents.Company;
 import Network.Location.House;
 import Company.Company;
 import Company.Request;
+import Company.RequestPrice;
 import Company.FulfilledRequest;
 import Company.Dispatch;
 import Network.Location.Location;
@@ -84,6 +85,12 @@ public class CompanyAgent extends Agent {
         return prices;
     }
 
+    public List<Double> getRoutePrices(Request request) {
+        RequestPrice requestPrice = new RequestPrice(request);
+        List<Double> prices = requestPrice.getBestPathPrices(company);
+        return prices;
+    }
+
     public void addResponderBehaviour() {
         MessageTemplate template = MessageTemplate.and(
                 MessageTemplate.MatchProtocol("route-request"),
@@ -115,7 +122,7 @@ public class CompanyAgent extends Agent {
             reply.setPerformative(ACLMessage.PROPOSE);
             String content = cfp.getContent();
             request = new Request(company.network, content);
-            List<Double> prices = getRoutePrices(request.getRoute());
+            List<Double> prices = getRoutePrices(request);
             reply.setContent(String.join(",", prices.stream().map(Object::toString).toArray(String[]::new)));
             reply.addUserDefinedParameter("log", prices.toString() + " to " + cfp.getSender().getLocalName() + " (from " + myAgent.getLocalName() + ")");
             // ...

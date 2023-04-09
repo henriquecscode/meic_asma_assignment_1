@@ -15,6 +15,7 @@ public class Hub {
     Hub(Company company, Location location) {
         this.location = location;
         this.location.addHub(this);
+        this.company = company;
     }
 
     public Location getLocation() {

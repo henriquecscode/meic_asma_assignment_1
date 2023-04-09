@@ -5,12 +5,13 @@ import Vehicle.Semi;
 import Vehicle.Ship;
 import Vehicle.Vehicle;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GlobalHub extends Hub {
 
-    private List<Ship> ships;
-    private List<Semi> semis;
+    private List<Ship> ships = new ArrayList<>();
+    private List<Semi> semis = new ArrayList<>();
 
     GlobalHub(Company company, Port port) {
         super(company, port);

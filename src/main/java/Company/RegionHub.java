@@ -5,12 +5,13 @@ import Vehicle.Vehicle;
 import Vehicle.Semi;
 import Vehicle.Van;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RegionHub extends Hub {
 
-    private List<Semi> semis;
-    private List<Van> vans;
+    private List<Semi> semis = new ArrayList<>();
+    private List<Van> vans = new ArrayList<>();
 
     RegionHub(Company company, City city) {
         super(company, city);

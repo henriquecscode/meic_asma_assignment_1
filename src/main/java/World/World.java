@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class World {
+    public static final long TICK_LENGTH = 100;
     protected final static int NUMBER_OF_COMPANIES = 10;
     protected final static int NUMBER_OF_PRODUCERS = 20;
     protected final static long startTime = System.currentTimeMillis();
@@ -178,6 +179,10 @@ public class World {
 
     public static long getTime() {
         return System.currentTimeMillis() - startTime;
+    }
+
+    public static long getTick() {
+        return getTime() / TICK_LENGTH;
     }
 }
 

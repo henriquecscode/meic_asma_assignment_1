@@ -2,10 +2,12 @@ package Vehicle;
 
 import Company.Company;
 import Network.Location.Location;
+import Network.Route.Route;
 import Vehicle.Seed.VehicleSeed;
 import Vehicle.States.State;
 import Vehicle.States.Idle;
 import Company.Hub;
+import World.World;
 
 public class Vehicle {
 
@@ -26,7 +28,7 @@ public class Vehicle {
 
     Vehicle(Company company, Location location, VehicleSeed vehicleSeed) {
         this.id = vehicleId++;
-        this.name = "Vehicle " + this.id;
+        this.name = "Vehicle" + this.id;
         this.seed = vehicleSeed;
         this.company = company;
         this.cargo = vehicleSeed.getCargo();
@@ -99,5 +101,10 @@ public class Vehicle {
     public Location getLocation() {
         return location;
     }
+
+    public long getTravelTime(Route route) {
+        return (long) Math.ceil(1.0 * route.getDistance() / speed * World.TICK_LENGTH);
+    }
+
 }
 

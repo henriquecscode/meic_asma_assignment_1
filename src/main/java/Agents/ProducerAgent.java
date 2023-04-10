@@ -1,7 +1,7 @@
 package Agents;
 
 
-import Company.Dispatch;
+import Company.RequestDispatch;
 import Company.FulfilledRequest;
 import Company.Request;
 import Network.Location.House;
@@ -91,7 +91,7 @@ public class ProducerAgent extends Agent {
         getCompanies();
 
         List<Location> path = Arrays.asList(producer.getLocation(), house);
-        Request request = new Request(producer.getLocation(), house, "testProduct", 1);
+        Request request = new Request(producer.getLocation(), house, "testProduct", getLocalName(), 1);
 
 //        addBehaviour(new RouteRequestContractNetInit(this, new ACLMessage(ACLMessage.CFP), request));
 
@@ -129,7 +129,7 @@ public class ProducerAgent extends Agent {
         private Request getRequest(ACLMessage cfp) {
             String content = cfp.getContent();
             Request request = new Request(producer.network, content);
-            Request producerRequest = new Request(producer.getLocation(), request.getEnd(), request.getProductName(), request.getQuantity());
+            Request producerRequest = new Request(producer.getLocation(), request.getEnd(), request.getProductName(), request.getClientName(), request.getQuantity());
             return producerRequest;
         }
 
@@ -186,17 +186,17 @@ public class ProducerAgent extends Agent {
             //            public void fulfillRequest(Map<ACLMessage, List<Integer>> proposalsByCompany) {
             public boolean fulfillRequest(List<Double> prices, List<ACLMessage> responses) {
                 fulfilledRequest = new FulfilledRequest(request);
-                List<Dispatch> dispatches = new ArrayList<>();
+                List<RequestDispatch> requestDispatches = new ArrayList<>();
                 List<Location> locations = request.getRoute();
                 for (int i = 0; i < prices.size(); i++) {
                     if (prices.get(i) == Double.MAX_VALUE) {
                         return false;
                     }
                     ACLMessage response = responses.get(i);
-                    Dispatch dispatch = new Dispatch(locations.get(i), locations.get(i + 1), response.getSender().getLocalName(), i);
-                    dispatches.add(dispatch);
+                    RequestDispatch requestDispatch = new RequestDispatch(locations.get(i), locations.get(i + 1), response.getSender().getLocalName(), i);
+                    requestDispatches.add(requestDispatch);
                 }
-                fulfilledRequest.setDispatches(dispatches);
+                fulfilledRequest.setDispatches(requestDispatches);
                 String content = fulfilledRequest.toString();
                 Set<ACLMessage> acceptedProposalsSet = responses.stream().collect(Collectors.toSet());
                 for (ACLMessage response : acceptedProposalsSet) {

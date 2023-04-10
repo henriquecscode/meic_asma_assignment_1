@@ -1,8 +1,9 @@
 package Client;
 
-import Agents.ClientAgent;
+import Agents.Client.ClientAgent;
 import Network.Location.House;
 import Network.Network;
+import World.AgentWorld;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
@@ -14,7 +15,7 @@ public class ClientSpawnerThread extends Thread {
     public static final int MIN_SPAWN_INTERVAL_MS = 1000;
     public static final int MAX_SPAWN_INTERVAL_MS = 10000;
 
-    private static final Random random = new Random(1);
+    public static final Random random = new Random(1);
     private final Network network;
     private final ContainerController container;
     private static int clientIndex = 0;
@@ -34,8 +35,10 @@ public class ClientSpawnerThread extends Thread {
 
         String name = "Client" + String.format("%02d", ClientSpawnerThread.getClientIndex());
         try {
-            AgentController ac = container.acceptNewAgent(name, new Agents.Client.ClientAgent(client));
+            ClientAgent clientAgent = new ClientAgent(client);
+            AgentController ac = container.acceptNewAgent(name, clientAgent);
             ac.start();
+            AgentWorld.agents.add(clientAgent);
         } catch (StaleProxyException e) {
             throw new RuntimeException(e);
         }

@@ -10,6 +10,7 @@ import Company.GlobalHub;
 import Company.RegionHub;
 import Company.Company;
 import Producer.Producer;
+import jade.core.Agent;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
@@ -25,6 +26,7 @@ public class AgentWorld extends World {
     private List<ClientAgent> clientsAgents = new ArrayList<>();
     private List<ProducerAgent> producersAgents = new ArrayList<>();
     private List<CompanyAgent> agentsAgents = new ArrayList<>();
+    public static List<Agent> agents = new ArrayList<>();
 
     public AgentWorld() {
         super();
@@ -63,6 +65,7 @@ public class AgentWorld extends World {
             ac = container.acceptNewAgent(name, producerAgent);
             ac.start();
             producersAgents.add(producerAgent);
+            agents.add(producerAgent);
             producerIndex++;
         }
     }
@@ -77,22 +80,28 @@ public class AgentWorld extends World {
             ac = container.acceptNewAgent(name, companyAgent);
             ac.start();
             agentsAgents.add(companyAgent);
+            agents.add(companyAgent);
 
-            int hubIndex = 0;
-            for (GlobalHub hub : company.getGlobalHubs()) {
-                name = "Company" + String.format("%02d", companyIndex) + "GlobalHub" + String.format("%02d", hubIndex);
-                ac = container.acceptNewAgent(name, new CompanyGlobalHubAgent(hub));
-                ac.start();
-                hubIndex++;
-            }
-
-            hubIndex = 0;
-            for (RegionHub hub : company.getRegionHubs()) {
-                name = "Company" + String.format("%02d", companyIndex) + "RegionHub" + String.format("%02d", hubIndex);
-                ac = container.acceptNewAgent(name, new CompanyRegionHubAgent(hub));
-                ac.start();
-                hubIndex++;
-            }
+//            int hubIndex = 0;
+//            for (GlobalHub hub : company.getGlobalHubs()) {
+//                name = "Company" + String.format("%02d", companyIndex) + "GlobalHub" + String.format("%02d", hubIndex);
+//                CompanyGlobalHubAgent companyGlobalHubAgent = new CompanyGlobalHubAgent(hub);
+//                ac = container.acceptNewAgent(name, companyGlobalHubAgent);
+//                ac.start();
+//                agents.add(companyGlobalHubAgent);
+//                hubIndex++;
+//
+//            }
+//
+//            hubIndex = 0;
+//            for (RegionHub hub : company.getRegionHubs()) {
+//                name = "Company" + String.format("%02d", companyIndex) + "RegionHub" + String.format("%02d", hubIndex);
+//                CompanyRegionHubAgent companyRegionHubAgent = new CompanyRegionHubAgent(hub);
+//                ac = container.acceptNewAgent(name, companyRegionHubAgent);
+//                ac.start();
+//                agents.add(companyRegionHubAgent);
+//                hubIndex++;
+//            }
             companyIndex++;
 
         }
@@ -108,18 +117,23 @@ public class AgentWorld extends World {
 
         AgentController ac3;
         try {
-            ac3 = container.acceptNewAgent("myRMA", new jade.tools.rma.rma());
+            Agent rma = new jade.tools.rma.rma();
+            ac3 = container.acceptNewAgent("myRMA", rma);
             ac3.start();
+            agents.add(rma);
         } catch (StaleProxyException e) {
             e.printStackTrace();
         }
     }
 
-    public void testProducerAgent(){
+    public void testProducerAgent() {
         producersAgents.get(0).testProducerRequest();
     }
 
     public void testClientAgent() {
+//        Agents.Client.ClientAgent.random.nextInt();
+//        Agents.Client.ClientAgent.random.nextInt();
+        ClientSpawnerThread.random.nextInt();
         clientSpawner.spawnClient();
     }
 

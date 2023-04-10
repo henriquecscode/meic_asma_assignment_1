@@ -5,11 +5,9 @@ import Network.Location.House;
 import Network.Location.Location;
 import Network.Location.Port;
 import Network.Network;
+import Network.Route.Route;
 import Vehicle.Seed.FleetSeed;
-import Vehicle.States.EnRoute;
-import Vehicle.States.Finished;
-import Vehicle.States.Idle;
-import Vehicle.States.State;
+import Vehicle.States.*;
 import Vehicle.Vehicle;
 import Vehicle.Ship;
 import Vehicle.Semi;
@@ -157,6 +155,7 @@ public class Company {
         // TODO discuss how should this be set
         return 1000;
     }
+
     private List<?> filterIdleVehicles(List<?> vehicles) {
         return vehicles.stream().filter(v -> ((Vehicle) v).getState() instanceof Idle).collect(Collectors.toList());
     }
@@ -294,16 +293,17 @@ public class Company {
     }
 
 
-    private Vehicle getFittingVehicleInLocation(List<Vehicle> vehicles, Location location, int cargoSize) {
+    private List<Vehicle> getFittingVehicleInLocation(List<Vehicle> vehicles, Location location, int cargoSize) {
+        List<Vehicle> fittingVehicles = new ArrayList<>();
         for (Vehicle vehicle : vehicles) {
             if (vehicle.getLocation() == location && vehicle.canFillUpCargo(cargoSize)) {
-                return vehicle;
+                fittingVehicles.add(vehicle);
             }
         }
-        return null;
+        return fittingVehicles;
     }
 
-    private Van findVehicleForNeighbourhoodRoute(Location start, Location end, int cargoSize) {
+    private List<Van> findVehicleAvailableForNeighbourhoodRoute(Location start, Location end, int cargoSize) {
         RegionHub hub;
         if (start instanceof House) {
             hub = (RegionHub) findLocationHub(((House) start).getCity());
@@ -317,11 +317,12 @@ public class Company {
         List<Van> idlingVans = vans.getIdlingVehicles();
         //intersect both
         List<Vehicle> availableVans = idlingVans.stream().filter(hubVans::contains).collect(Collectors.toList());
-        return (Van) getFittingVehicleInLocation(availableVans, start, cargoSize);
+        List<Vehicle> fittingVans = getFittingVehicleInLocation(availableVans, start, cargoSize);
+        return fittingVans.stream().map(v -> (Van) v).collect(Collectors.toList());
     }
 
 
-    private Semi findSemiInHub(Hub hub, int cargoSize) {
+    private List<Semi> findSemiInHub(Hub hub, int cargoSize) {
         List<Semi> hubSemis;
         if (hub instanceof RegionHub) {
             hubSemis = ((RegionHub) hub).getSemis();
@@ -331,13 +332,14 @@ public class Company {
         List<Semi> idlingSemis = semis.getIdlingVehicles();
         //intersect both
         List<Vehicle> availableSemis = idlingSemis.stream().filter(hubSemis::contains).collect(Collectors.toList());
-        return (Semi) getFittingVehicleInLocation(availableSemis, hub.getLocation(), cargoSize);
+        List<Vehicle> fittingSemis = getFittingVehicleInLocation(availableSemis, hub.getLocation(), cargoSize);
+        return fittingSemis.stream().map(v -> (Semi) v).collect(Collectors.toList());
     }
 
-    private Semi findVehicleForRegionalRoute(Location start, Location end, int cargoSize) {
+    private List<Semi> findVehicleAvailableForRegionalRoute(Location start, Location end, int cargoSize) {
         RegionHub regionHub;
         GlobalHub globalHub;
-        Semi semi;
+        List<Semi> semis;
         if (start instanceof City) {
             regionHub = (RegionHub) findLocationHub(start);
             globalHub = (GlobalHub) findLocationHub(((City) start).getPort());
@@ -346,91 +348,139 @@ public class Company {
             globalHub = (GlobalHub) findLocationHub(((City) end).getPort());
         }
         if (regionHub != null) {
-            semi = findSemiInHub(regionHub, cargoSize);
-            if (semi != null) {
-                return semi;
+            semis = findSemiInHub(regionHub, cargoSize);
+            if (!semis.isEmpty()) {
+                return semis;
             }
         }
         if (globalHub != null) {
-            semi = findSemiInHub(globalHub, cargoSize);
-            if (semi != null) {
-                return semi;
+            semis = findSemiInHub(globalHub, cargoSize);
+            if (!semis.isEmpty()) {
+                return semis;
             }
         }
-        return null;
+        return new ArrayList<>();
     }
 
-    private Ship findShipForPort(GlobalHub hub, int cargoSize) {
+    private List<Ship> findShipForPort(GlobalHub hub, int cargoSize) {
         List<Ship> hubShips = hub.getShips();
         List<Ship> idlingShips = ships.getIdlingVehicles();
         //intersect both
         List<Vehicle> availableShips = idlingShips.stream().filter(hubShips::contains).collect(Collectors.toList());
-        return (Ship) getFittingVehicleInLocation(availableShips, hub.getLocation(), cargoSize);
+        List<Vehicle> fittingShips = getFittingVehicleInLocation(availableShips, hub.getLocation(), cargoSize);
+        return fittingShips.stream().map(v -> (Ship) v).collect(Collectors.toList());
     }
 
-    private Ship findShipInPort(GlobalHub hub, int cargoSize) {
+    private List<Ship> findShipInPort(GlobalHub hub, int cargoSize) {
         List<Ship> hubShips = hub.getShips();
         List<Ship> idlingShips = ships.getIdlingVehicles();
         //intersect both
-        List<Ship> availableShips = idlingShips.stream().filter(hubShips::contains).collect(Collectors.toList());
-        if (availableShips.isEmpty()) {
-            return null;
-        } else {
-            for (Ship ship : availableShips) {
-                if (ship.canFillUpCargo(cargoSize)) {
-                    if (ship.getLocation().equals(hub.getLocation())) {
-                        return ship;
-                    }
-                }
-            }
-        }
-
-        return null;
+        List<Vehicle> availableShips = idlingShips.stream().filter(hubShips::contains).collect(Collectors.toList());
+        List<Vehicle> fittingsShips = getFittingVehicleInLocation(availableShips, hub.getLocation(), cargoSize);
+        return fittingsShips.stream().map(v -> (Ship) v).collect(Collectors.toList());
     }
 
-    private Ship findVehicleForInternationalRoute(Location start, Location end, int cargoSize) {
+    private List<Ship> findVehicleAvailableForInternationalRoute(Location start, Location end, int cargoSize) {
         GlobalHub hub;
         hub = (GlobalHub) findLocationHub(start);
-        Ship ship = null;
+        List<Ship> ships;
         if (hub != null) {
-            ship = findShipInPort(hub, cargoSize);
+            ships = findShipInPort(hub, cargoSize);
 
-            if (ship != null) {
-                return ship;
+            if (!ships.isEmpty()) {
+                return ships;
             }
         }
         for (Location port : start.getUpperLocations()) {
             hub = (GlobalHub) findLocationHub(port);
             if (hub != null) {
-                ship = findShipInPort(hub, cargoSize);
-                if (ship != null) {
-                    return ship;
+                ships = findShipInPort(hub, cargoSize);
+                if (!ships.isEmpty()) {
+                    return ships;
                 }
             }
         }
         return null;
     }
 
-    public Vehicle findVehicle(Location start, Location end, int cargoSize) {
+    public List<Vehicle> findVehicle(Location start, Location end, int cargoSize) {
         RouteType routeType = getRouteType(start, end);
+        List<? extends Vehicle> vehicles;
         if (routeType == RouteType.Neighbour) {
-            return findVehicleForNeighbourhoodRoute(start, end, cargoSize);
+            vehicles = findVehicleAvailableForNeighbourhoodRoute(start, end, cargoSize);
         } else if (routeType == RouteType.Regional) {
-            return findVehicleForRegionalRoute(start, end, cargoSize);
+            vehicles = findVehicleAvailableForRegionalRoute(start, end, cargoSize);
         } else if (routeType == RouteType.International) {
-            return findVehicleForInternationalRoute(start, end, cargoSize);
+            vehicles = findVehicleAvailableForInternationalRoute(start, end, cargoSize);
+        } else {
+            throw new IllegalArgumentException("Invalid route type");
         }
-        throw new IllegalArgumentException("Invalid route type");
+        return vehicles.stream().map(v -> (Vehicle) v).collect(Collectors.toList());
     }
 
-    public void dispatchVehicle(Vehicle vehicle) {
+    public void updateVehicle(Vehicle vehicle) {
+        CompanyTypeVehicles vehicles = null;
         if (vehicle instanceof Van) {
-            vans.updateVehicle((Van) vehicle);
+            vehicles = vans;
         } else if (vehicle instanceof Semi) {
-            semis.updateVehicle((Semi) vehicle);
+            vehicles = semis;
         } else if (vehicle instanceof Ship) {
-            ships.updateVehicle((Ship) vehicle);
+            vehicles = ships;
+        } else {
+            throw new IllegalArgumentException("Invalid vehicle type");
         }
+        vehicles.updateVehicle(vehicle);
+    }
+
+    public Thread dispatchVehicle(Vehicle vehicle) {
+        if (!(vehicle.getState() instanceof Holding)) {
+            throw new IllegalArgumentException("Vehicle is not in holding state");
+        }
+        Dispatch dispatch = ((Holding) vehicle.getState()).getDispatch();
+        Location start = dispatch.getStart();
+        Location end = dispatch.getEnd();
+        Route route = network.getRoute(start, end);
+
+        vehicle.setLocation(null);
+        vehicle.setState(new EnRoute(route, start, end));
+        dispatch.setVehicleFilledUpCargo(vehicle.getFilledUpCargo());
+        CompanyTypeVehicles vehicles = null;
+        if (vehicle instanceof Van) {
+            vehicles = vans;
+        } else if (vehicle instanceof Semi) {
+            vehicles = semis;
+        } else /* (vehicle instanceof Ship) */ {
+            vehicles = ships;
+        }
+        vehicles.updateVehicle(vehicle);
+
+        CompanyTypeVehicles finalVehicles = vehicles;
+        Thread vehicleDispatch = new Thread(() -> {
+            try {
+                long time = vehicle.getTravelTime(route);
+                System.out.println("Vehicle " + vehicle.getName() + "sent from " + start.getName() + " to " + end.getName() + " will arrive in" + time + " ms");
+                Thread.sleep(time);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            vehicle.setState(new Finished(route, end));
+            vehicle.setLocation(end);
+            finalVehicles.updateVehicle(vehicle);
+        });
+        vehicleDispatch.start();
+        return vehicleDispatch;
+
+    }
+
+    public void holdVehicle(Vehicle vehicle, Dispatch dispatch) {
+        vehicle.setState(new Holding(dispatch));
+        updateVehicle(vehicle);
+    }
+
+    public void idleVehicle(Vehicle vehicle) {
+        vehicle.setState(new Idle(vehicle.getLocation()));
+        updateVehicle(vehicle);
     }
 
 }
@@ -447,6 +497,7 @@ class CompanyTypeVehicles<V extends Vehicle> {
     private final List<V> idlingVehicles = new ArrayList<>();
     private final List<V> enRouteVehicles = new ArrayList<>();
     private final List<V> finishedVehicles = new ArrayList<>();
+    private final List<V> holdingVehicles = new ArrayList<>();
 
     CompanyTypeVehicles(List<V> vehicles) {
         this.vehicles = vehicles;
@@ -462,7 +513,10 @@ class CompanyTypeVehicles<V extends Vehicle> {
         if (!found) {
             found = enRouteVehicles.remove(vehicle);
             if (!found) {
-                finishedVehicles.remove(vehicle);
+                found = finishedVehicles.remove(vehicle);
+                if (!found) {
+                    found = holdingVehicles.remove(vehicle);
+                }
             }
         }
 
@@ -472,6 +526,8 @@ class CompanyTypeVehicles<V extends Vehicle> {
             this.enRouteVehicles.add(vehicle);
         } else if (state instanceof Finished) {
             this.finishedVehicles.add(vehicle);
+        } else if (state instanceof Holding) {
+            this.holdingVehicles.add(vehicle);
         }
     }
 
@@ -485,6 +541,10 @@ class CompanyTypeVehicles<V extends Vehicle> {
 
     public List<V> getFinishedVehicles() {
         return finishedVehicles;
+    }
+
+    public List<V> getHoldingVehicles() {
+        return holdingVehicles;
     }
 
     public List<V> getVehicles() {

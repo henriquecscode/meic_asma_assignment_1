@@ -1,5 +1,7 @@
+package App;
+
 import World.AgentWorld;
-import World.World;
+import utils.GetDate;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,14 +25,25 @@ public class App {
             "product_seeds/catalog.txt"
     );
 
-    public static void main(String[] args) throws Exception {
+    private final static String EXECUTIONS_FOLDER = "execution";
+    private final static String DEFAULT_WORLD_SEED = "2023_04_08_15_27_41_seed";
+    private static String worldSeed = DEFAULT_WORLD_SEED;
+    public static String executionLogFolder = "";
+
+    public static void run(String[] args) {
+        if (args.length > 0) {
+            worldSeed = args[0];
+        }
         init();
-        AgentWorld world = new AgentWorld("2023_04_08_15_27_41_seed");
+        AgentWorld world = new AgentWorld(worldSeed);
         world.run();
         System.out.println("Hello, World!");
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
+//        world.testProducerAgent();
         world.testClientAgent();
+        scanner.nextLine();
+        System.exit(0);
     }
 
     public static void init() {
@@ -47,6 +60,14 @@ public class App {
                 e.printStackTrace();
             }
         }
+
+        File executionsFolder = new File(EXECUTIONS_FOLDER);
+        executionsFolder.mkdirs();
+
+        executionLogFolder = executionsFolder + "/" + worldSeed + "_" + GetDate.getDate();
+        File worldSeedFolder = new File(executionLogFolder);
+        worldSeedFolder.mkdirs();
+
 
     }
 }

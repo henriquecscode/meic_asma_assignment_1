@@ -53,7 +53,7 @@ public class ProducerAgent extends Agent {
         }
 
         MessageTemplate template = MessageTemplate.and(
-                MessageTemplate.MatchProtocol("product-request"),
+                MessageTemplate.MatchProtocol(Protocols.PRODUCT_REQUEST.name()),
                 MessageTemplate.MatchPerformative(ACLMessage.CFP)
         );
         addBehaviour(new ProductRequestResponderDispatcher(this, template));
@@ -171,7 +171,7 @@ public class ProducerAgent extends Agent {
             protected Vector prepareCfps(ACLMessage cfp) {
 
                 cfp.setContent(request.toString());
-                cfp.setProtocol("route-request");
+                cfp.setProtocol(Protocols.ROUTE_REQUEST.name());
                 getCompanies();
                 for (AID company : companies) {
                     cfp.addReceiver(company);

@@ -20,6 +20,7 @@ import World.World;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
@@ -102,11 +103,11 @@ public class CompanyAgent extends Agent {
         );
         MessageTemplate requestDispatchedTemplate = MessageTemplate.and(
                 MessageTemplate.MatchProtocol(Protocols.REQUEST_DISPATCHED.name()),
-                MessageTemplate.MatchPerformative(ACLMessage.CFP)
+                MessageTemplate.MatchPerformative(ACLMessage.INFORM)
         );
         MessageTemplate requestArrivalTemplate = MessageTemplate.and(
                 MessageTemplate.MatchProtocol(Protocols.REQUEST_ARRIVAL.name()),
-                MessageTemplate.MatchPerformative(ACLMessage.CFP)
+                MessageTemplate.MatchPerformative(ACLMessage.INFORM)
         );
 
         addBehaviour(new RouteRequestResponderDispatcher(this, routeRequestTemplate));
@@ -174,23 +175,23 @@ public class CompanyAgent extends Agent {
 
         protected Behaviour createResponder(ACLMessage msg) {
             System.out.println(myAgent.getLocalName() + " got a request dispatch from " + msg.getSender().getLocalName() + "!");
-            return new RequestDispatchHandler();
+            return new RequestDispatchHandler(msg);
         }
 
         class RequestDispatchHandler extends Behaviour {
+            private ACLMessage msg;
             Boolean isDone = false;
+
+            public RequestDispatchHandler(ACLMessage msg) {
+                this.msg = msg;
+            }
 
             @Override
             public void action() {
-                ACLMessage msg = receive(mt);
-                if (msg != null) {
-                    String content = msg.getContent();
-                    FulfilledRequest request = new FulfilledRequest(company.network, content);
-                    prepareRequest(request);
-                    isDone = true;
-                } else {
-                    block();
-                }
+                String content = msg.getContent();
+                FulfilledRequest request = new FulfilledRequest(company.network, content);
+                prepareRequest(request);
+                isDone = true;
             }
 
             @Override
@@ -210,23 +211,24 @@ public class CompanyAgent extends Agent {
 
         protected Behaviour createResponder(ACLMessage msg) {
             System.out.println(myAgent.getLocalName() + " got a request dispatch from " + msg.getSender().getLocalName() + "!");
-            return new RequestArrivalHandler();
+            return new RequestArrivalHandler(msg);
         }
 
         class RequestArrivalHandler extends Behaviour {
+            private ACLMessage msg;
             Boolean isDone = false;
+
+            public RequestArrivalHandler(ACLMessage msg) {
+                this.msg = msg;
+            }
 
             @Override
             public void action() {
-                ACLMessage msg = receive(mt);
-                if (msg != null) {
-                    String content = msg.getContent();
-                    FulfilledRequest request = new FulfilledRequest(company.network, content);
-                    handleFulfilledRequest(request);
-                    isDone = true;
-                } else {
-                    block();
-                }
+                String content = msg.getContent();
+                FulfilledRequest request = new FulfilledRequest(company.network, content);
+                continueRequest(request);
+                isDone = true;
+
             }
 
             @Override
@@ -241,7 +243,7 @@ public class CompanyAgent extends Agent {
         if (firstDispatcher(fulfilledRequest)) {
             startRequest(fulfilledRequest);
         } else {
-            continueRequest(fulfilledRequest);
+            System.out.println(getLocalName() + "Not first dispatcher of " + fulfilledRequest.toString() + "!");
         }
     }
 
@@ -449,7 +451,6 @@ public class CompanyAgent extends Agent {
 
                 if (fulfilledRequest.isFinished()) {
                     finishRequest(fulfilledRequest);
-
                 } else {
                     RequestDispatch nextDispatch = fulfilledRequest.getDispatch();
                     if (!nextDispatch.getCompanyName().equals(getLocalName())) {

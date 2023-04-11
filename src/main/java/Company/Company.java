@@ -407,7 +407,7 @@ public class Company {
                 }
             }
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public List<Vehicle> findVehicle(Location start, Location end, int cargoSize) {

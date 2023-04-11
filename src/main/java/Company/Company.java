@@ -158,9 +158,9 @@ public class Company {
         return network;
     }
 
-    public Integer getPricePerVehicle() {
+    public Double getPricePerVehicle() {
         // TODO discuss how should this be set
-        return 1000;
+        return 1000.0;
     }
 
     private List<?> filterIdleVehicles(List<?> vehicles) {

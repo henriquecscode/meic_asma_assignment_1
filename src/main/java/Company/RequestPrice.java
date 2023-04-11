@@ -16,15 +16,33 @@ public class RequestPrice {
         this.request = request;
     }
 
-    private Double getBestPrice(Location start, Location end, Company company) {
-        List<Vehicle> primaryVehicles = company.findVehicle(start, end, 0);
-        List<Vehicle> secondaryVehicles = company.findVehicle(end, start, 0);
-        int numPrimaryVehicles = primaryVehicles.size();
-        int numSecondaryVehicles = secondaryVehicles.size();
-        if (numPrimaryVehicles == 0 && numSecondaryVehicles == 0) {
+    private double getPriceFromMetrics(int numPrimaryVehicles, int numSecondaryVehicles, int numAnyVehiclePrimary, int numAnyVehicleSecondary, double pricePerVehicle) {
+
+        if (numPrimaryVehicles == 0 && numSecondaryVehicles == 0 && numAnyVehiclePrimary == 0 && numAnyVehicleSecondary == 0) {
             return IMPOSSIBLE_PRICE;
         }
-        return (double) (numPrimaryVehicles * company.getPricePerVehicle() + numSecondaryVehicles * company.getPricePerVehicle() * 2);
+        double primaryComponent = numPrimaryVehicles == 0 ? pricePerVehicle : pricePerVehicle / (numPrimaryVehicles);
+        double secondaryComponent = numSecondaryVehicles == 0 ? pricePerVehicle : pricePerVehicle / (numSecondaryVehicles);
+        double anyVehiclePrimaryComponent = numAnyVehiclePrimary == 0 ? pricePerVehicle : pricePerVehicle / (numAnyVehiclePrimary);
+        double anyVehicleSecondaryComponent = numAnyVehicleSecondary == 0 ? pricePerVehicle : pricePerVehicle / (numAnyVehicleSecondary);
+
+        double weighedPrimaryComponent = primaryComponent * 2;
+        double weighedSecondaryComponent = secondaryComponent;
+        double weighedAnyVehiclePrimaryComponent = anyVehiclePrimaryComponent / 2;
+        double weighedAnyVehicleSecondaryComponent = anyVehicleSecondaryComponent / 2;
+        return weighedPrimaryComponent + weighedSecondaryComponent + weighedAnyVehiclePrimaryComponent + weighedAnyVehicleSecondaryComponent;
+    }
+
+    private Double getBestPrice(Location start, Location end, Company company) {
+        List<Vehicle> primaryVehicles = company.findVehicle(start, end, request.getProductVolume());
+        List<Vehicle> secondaryVehicles = company.findVehicle(end, start, request.getProductVolume());
+        List<Vehicle> anyVehiclePrimary = company.findAnyVehicle(start, end, request.getProductVolume());
+        List<Vehicle> anyVehicleSecondary = company.findAnyVehicle(end, start, request.getProductVolume());
+        int numPrimaryVehicles = primaryVehicles.size();
+        int numSecondaryVehicles = secondaryVehicles.size();
+        int numAnyVehiclePrimary = anyVehiclePrimary.size();
+        int numAnyVehicleSecondary = anyVehicleSecondary.size();
+        return getPriceFromMetrics(numPrimaryVehicles, numSecondaryVehicles, numAnyVehiclePrimary, numAnyVehicleSecondary, company.getPricePerVehicle());
 //        int numVehicles = company.getVehiclesInAdjacentLocations(start, end).size();
 //        return numVehicles == 0 ? IMPOSSIBLE_PRICE : company.getPricePerVehicle();
     }

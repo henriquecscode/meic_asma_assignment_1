@@ -83,6 +83,16 @@ public class ProducerAgent extends Agent {
         return production.getPriceMult();
     }
 
+    private double calculatePrice(Production production, List<Double> prices) {
+        double totalRoutePrice = 0;
+        double productionMult = production.getPriceMult();
+        for (Double price : prices) {
+            totalRoutePrice += price;
+        }
+        double finalPrice = production.getProduct().getBasePrice() * productionMult + totalRoutePrice * productionMult;
+        return finalPrice;
+    }
+
     public void testProducerRequest() {
         Random random = new Random(1);
         List<House> houses = producer.network.getHouses();
@@ -113,11 +123,16 @@ public class ProducerAgent extends Agent {
         List<ACLMessage> acceptedProposals = new ArrayList<>();
         Request request;
         Production production;
+        boolean trivialRequest = false;
 
         public ProductRequestContractNetResponder(Agent a, ACLMessage cfp) {
             super(a, cfp);
             request = getRequest(cfp);
             production = getProduction();
+            if (trivialRequest) {
+                return;
+            }
+
             if (production != null) {
                 registerHandleCfp(new RouteRequestContractNetInit(myAgent, new ACLMessage(ACLMessage.CFP), CFP_KEY, REPLY_KEY));
                 registerHandleAcceptProposal(new RouteRequestConfirmationContractNetInit(myAgent, true));
@@ -130,6 +145,12 @@ public class ProducerAgent extends Agent {
             String content = cfp.getContent();
             Request request = new Request(producer.network, content);
             Request producerRequest = new Request(producer.getLocation(), request.getEnd(), request.getProductName(), request.getClientName(), request.getQuantity());
+            if (request.getEnd() == producer.getLocation()) {
+                fulfilledRequest = new FulfilledRequest(producerRequest);
+                fulfilledRequest.setDispatches(new ArrayList<>());
+                producerRequest = fulfilledRequest;
+                trivialRequest = true;
+            }
             return producerRequest;
         }
 
@@ -151,9 +172,31 @@ public class ProducerAgent extends Agent {
         protected ACLMessage handleCfp(ACLMessage cfp) {
             // production was necessarily null
             ACLMessage reply = cfp.createReply();
-            reply.setPerformative(ACLMessage.REFUSE);
+            if (trivialRequest) {
+                reply.setPerformative(ACLMessage.PROPOSE);
+                double price = calculatePrice(production, new ArrayList<>());
+                reply.setContent(Double.toString(price));
+            } else {
+                reply.setPerformative(ACLMessage.REFUSE);
+            }
             return reply;
         }
+
+        protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
+            // production was necessarily null
+            if (trivialRequest) {
+                ACLMessage reply = accept.createReply();
+                reply.setPerformative(ACLMessage.INFORM);
+                fulfilledRequest.setStartedOn(World.getTime());
+                fulfilledRequest.setPrice(Double.parseDouble(propose.getContent()));
+                fulfilledRequest.setFinishedOn(World.getTime());
+                reply.setContent(fulfilledRequest.toString());
+                return reply;
+            } else {
+                throw new RuntimeException("Should not be called");
+            }
+        }
+
 
         protected void cleanReply() {
             getDataStore().remove(REPLY_KEY);
@@ -256,7 +299,7 @@ public class ProducerAgent extends Agent {
                     replyCFP.setContent("No route available");
                 } else {
                     replyCFP.setPerformative(ACLMessage.PROPOSE);
-                    double finalPrice = calculatePrice(prices);
+                    double finalPrice = calculatePrice(production, prices);
                     replyCFP.setContent(Double.toString(finalPrice));
                     fulfilledRequest.setPrice(finalPrice);
                 }
@@ -269,15 +312,7 @@ public class ProducerAgent extends Agent {
 //                System.out.println("got " + resultNotifications.size() + " result notifs!");
             }
 
-            private double calculatePrice(List<Double> prices) {
-                double totalRoutePrice = 0;
-                double productionMult = production.getPriceMult();
-                for (Double price : prices) {
-                    totalRoutePrice += price;
-                }
-                double finalPrice = totalRoutePrice * productionMult;
-                return finalPrice;
-            }
+
         }
 
         class RouteRequestConfirmationContractNetInit extends Behaviour {

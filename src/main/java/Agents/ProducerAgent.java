@@ -258,6 +258,7 @@ public class ProducerAgent extends Agent {
                     replyCFP.setPerformative(ACLMessage.PROPOSE);
                     double finalPrice = calculatePrice(prices);
                     replyCFP.setContent(Double.toString(finalPrice));
+                    fulfilledRequest.setPrice(finalPrice);
                 }
 
                 rejectProposals(responses, companiesMessageByRoute, acceptances);
@@ -291,6 +292,7 @@ public class ProducerAgent extends Agent {
             @Override
             public void action() {
                 cleanReply();
+                System.out.println(getLocalName() + "sending accept/reject to companies of request" + fulfilledRequest.toString());
                 for (ACLMessage acceptedProposal : acceptedProposals) {
                     if (accept) {
                         fulfilledRequest.setStartedOn(World.getTime());

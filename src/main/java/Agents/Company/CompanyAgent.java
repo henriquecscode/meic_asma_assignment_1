@@ -451,7 +451,8 @@ public class CompanyAgent extends Agent {
                     finishRequest(fulfilledRequest);
 
                 } else {
-                    if (!dispatch.getCompanyName().equals(getLocalName())) {
+                    RequestDispatch nextDispatch = fulfilledRequest.getDispatch();
+                    if (!nextDispatch.getCompanyName().equals(getLocalName())) {
                         informParticipantsArrival(fulfilledRequest);
                     } else {
                         proceedingRequests.add(request);

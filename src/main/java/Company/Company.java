@@ -425,6 +425,57 @@ public class Company {
         return vehicles.stream().map(v -> (Vehicle) v).collect(Collectors.toList());
     }
 
+    public List<Vehicle> findAnyVehicle(Location start, Location end, int cargoSize) {
+        RouteType routeType = getRouteType(start, end);
+        List<? extends Vehicle> vehicles = new ArrayList<>();
+        if (routeType == RouteType.Neighbour) {
+            RegionHub regionHub = null;
+            if (start instanceof City) {
+                regionHub = (RegionHub) findLocationHub(start);
+            } else {
+                regionHub = (RegionHub) findLocationHub(end);
+            }
+            if (regionHub != null) {
+                vehicles = regionHub.getVans();
+            }
+            return vehicles.stream().map(v -> (Vehicle) v).collect(Collectors.toList());
+        } else if (routeType == RouteType.Regional) {
+            List<Semi> semis = new ArrayList<>();
+            RegionHub regionHub = null;
+            GlobalHub globalHub = null;
+            if (start instanceof City) {
+                regionHub = (RegionHub) findLocationHub(start);
+                globalHub = (GlobalHub) findLocationHub(end);
+            } else {
+                regionHub = (RegionHub) findLocationHub(end);
+                globalHub = (GlobalHub) findLocationHub(start);
+            }
+            if (regionHub != null) {
+                semis.addAll(regionHub.getSemis());
+            }
+            if (globalHub != null) {
+                semis.addAll(globalHub.getSemis());
+            }
+            return semis.stream().map(v -> (Vehicle) v).collect(Collectors.toList());
+        } else if (routeType == RouteType.International) {
+            GlobalHub g1 = (GlobalHub) findLocationHub(start);
+            GlobalHub g2 = (GlobalHub) findLocationHub(end);
+            List<Ship> ships = new ArrayList<>();
+            if (g1 != null) {
+                ships.addAll(g1.getShips());
+            }
+            if (g2 != null) {
+                ships.addAll(g2.getShips());
+            }
+            ships = ships.stream().filter(s -> s.getCargoCapacity() >= cargoSize).collect(Collectors.toList());
+            //return map ships to vehicle
+            return ships.stream().map(v -> (Vehicle) v).collect(Collectors.toList());
+
+        } else {
+            throw new IllegalArgumentException("Invalid route type");
+        }
+    }
+
     public void updateVehicle(Vehicle vehicle) {
         CompanyTypeVehicles vehicles = null;
         if (vehicle instanceof Van) {

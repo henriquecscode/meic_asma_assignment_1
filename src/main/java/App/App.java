@@ -37,7 +37,6 @@ public class App {
         init();
         AgentWorld world = new AgentWorld(worldSeed);
         world.run();
-        System.out.println("Hello, World!");
         Scanner scanner = new Scanner(System.in);
         String input = "";
         while (!input.equals("exit")) {

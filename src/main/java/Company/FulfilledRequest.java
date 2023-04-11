@@ -6,7 +6,7 @@ import java.util.List;
 import Network.Network;
 
 public class FulfilledRequest extends Request {
-    private static final int PARENT_ATTRIBUTES = 4;
+    private static final int PARENT_ATTRIBUTES = 5;
     private List<RequestDispatch> requestDispatches = new ArrayList<>();
     private double price;
     private long startedOn;
@@ -15,7 +15,7 @@ public class FulfilledRequest extends Request {
     private int requestStage;
 
     public FulfilledRequest(Request request) {
-        super(request.getStart(), request.getEnd(), request.getProductName(), request.getClientName(), request.getQuantity());
+        super(request.getStart(), request.getEnd(), request.getProductName(), request.getClientName(), request.getProductVolume(), request.getQuantity());
         this.requestStage = 0;
     }
 

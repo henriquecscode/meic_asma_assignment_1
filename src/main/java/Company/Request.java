@@ -9,12 +9,14 @@ import java.util.List;
 public class Request {
     private final String clientName;
     private final String productName;
+    private final int productVolume;
     private final int quantity;
     private final Itinerary route;
 
-    public Request(House start, House end, String productName, String clientName, int quantity) {
+    public Request(House start, House end, String productName, String clientName, int productVolume, int quantity) {
         this.clientName = clientName;
         this.productName = productName;
+        this.productVolume = productVolume;
         this.quantity = quantity;
         this.route = new Itinerary(start, end);
     }
@@ -23,8 +25,9 @@ public class Request {
         String[] requestInfo = request.split(";");
         this.clientName = requestInfo[0];
         this.productName = requestInfo[1];
-        this.quantity = Integer.parseInt(requestInfo[2]);
-        this.route = new Itinerary(network, requestInfo[3]);
+        this.productVolume = Integer.parseInt(requestInfo[2]);
+        this.quantity = Integer.parseInt(requestInfo[3]);
+        this.route = new Itinerary(network, requestInfo[4]);
     }
 
     public String getClientName() {
@@ -33,6 +36,10 @@ public class Request {
 
     public String getProductName() {
         return productName;
+    }
+
+    public int getProductVolume() {
+        return productVolume;
     }
 
     public int getQuantity() {
@@ -53,6 +60,6 @@ public class Request {
 
     @Override
     public String toString() {
-        return clientName + ";" + productName + ";" + quantity + ";" + route.toString();
+        return clientName + ";" + productName + ";" + productVolume + ";" + quantity + ";" + route.toString();
     }
 }

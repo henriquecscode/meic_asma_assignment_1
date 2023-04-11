@@ -11,6 +11,7 @@ public class FulfilledRequest extends Request {
     private double price;
     private long startedOn;
     private long finishedOn;
+    private long requestTime;
     private int requestStage;
 
     public FulfilledRequest(Request request) {
@@ -31,7 +32,8 @@ public class FulfilledRequest extends Request {
         this.price = Double.parseDouble(requestInfo[i + 1]);
         this.startedOn = Integer.parseInt(requestInfo[i + 2]);
         this.finishedOn = Integer.parseInt(requestInfo[i + 3]);
-        this.requestStage = Integer.parseInt(requestInfo[i + 4]);
+        this.requestTime = Integer.parseInt(requestInfo[i + 4]);
+        this.requestStage = Integer.parseInt(requestInfo[i + 5]);
     }
 
     public void setDispatches(List<RequestDispatch> requestDispatches) {
@@ -75,6 +77,7 @@ public class FulfilledRequest extends Request {
 
     public void setFinishedOn(long finishedOn) {
         this.finishedOn = finishedOn;
+        this.requestTime = finishedOn - startedOn;
     }
 
     public int getRequestStage() {
@@ -96,6 +99,6 @@ public class FulfilledRequest extends Request {
     @Override
     public String toString() {
         String dispatchesString = String.join(":", requestDispatches.stream().map(RequestDispatch::toString).toArray(String[]::new));
-        return super.toString() + ";" + dispatchesString + ";" + price + ";" + startedOn + ";" + finishedOn + ";" + requestStage;
+        return super.toString() + ";" + dispatchesString + ";" + price + ";" + startedOn + ";" + finishedOn + ";" + requestTime + ";" + requestStage;
     }
 }

@@ -176,13 +176,16 @@ public class World {
         this.producers.add(new Producer(this.network, producerSeed));
     }
 
-
-    public static long getTime() {
+    private static long getWorldTime() {
         return System.currentTimeMillis() - startTime;
     }
 
-    public static long getTick() {
-        return getTime() / TICK_LENGTH;
+    public static long getTime() {
+        return getWorldTick();
+    }
+
+    private static long getWorldTick() {
+        return getWorldTime() / TICK_LENGTH;
     }
 }
 

@@ -39,9 +39,10 @@ public class App {
         world.run();
         Scanner scanner = new Scanner(System.in);
         String input = "";
+        input = scanner.nextLine();
         while (!input.equals("exit")) {
-            input = scanner.nextLine();
             world.testClientAgent();
+            input = scanner.nextLine();
         }
         System.exit(0);
     }

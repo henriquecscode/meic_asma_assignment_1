@@ -28,7 +28,7 @@ public class Vehicle {
 
     Vehicle(Company company, Location location, VehicleSeed vehicleSeed) {
         this.id = vehicleId++;
-        this.name = "Vehicle" + this.id;
+        this.name = company.getName() + "-" + "Vehicle" + this.id;
         this.seed = vehicleSeed;
         this.company = company;
         this.cargo = vehicleSeed.getCargo();

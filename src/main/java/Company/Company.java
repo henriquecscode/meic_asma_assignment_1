@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Company {
+    public static int companyId = 0;
+    private final int id;
+    private final String name;
 
     public final Network network;
     private final CompanySeed companySeed;
@@ -32,6 +35,8 @@ public class Company {
     private CompanyTypeVehicles<Van> vans;
 
     public Company(Network network, CompanySeed companySeed, FleetSeed fleetSeed) {
+        this.id = companyId++;
+        this.name = "Company" + this.id;
         this.network = network;
         this.companySeed = companySeed;
         this.makeHubs(network, companySeed);
@@ -119,6 +124,10 @@ public class Company {
             van.setLocation(cityLocation);
         }
         this.vans = new CompanyTypeVehicles<Van>(vans);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public CompanySeed getSeed() {

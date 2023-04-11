@@ -54,7 +54,7 @@ public class CompanyAgent extends Agent {
         House end = houses.get((int) (Math.random() * houses.size()));
         houses.add(start);
 
-        return new Request(start, end, "test", "noclient", 1);
+        return new Request(start, end, "test", "noclient", 1, 1);
     }
 
     protected void setup() {

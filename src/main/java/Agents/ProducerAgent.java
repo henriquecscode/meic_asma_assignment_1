@@ -101,7 +101,7 @@ public class ProducerAgent extends Agent {
         getCompanies();
 
         List<Location> path = Arrays.asList(producer.getLocation(), house);
-        Request request = new Request(producer.getLocation(), house, "testProduct", getLocalName(), 1);
+        Request request = new Request(producer.getLocation(), house, "testProduct", getLocalName(), 1, 1);
 
 //        addBehaviour(new RouteRequestContractNetInit(this, new ACLMessage(ACLMessage.CFP), request));
 
@@ -144,7 +144,7 @@ public class ProducerAgent extends Agent {
         private Request getRequest(ACLMessage cfp) {
             String content = cfp.getContent();
             Request request = new Request(producer.network, content);
-            Request producerRequest = new Request(producer.getLocation(), request.getEnd(), request.getProductName(), request.getClientName(), request.getQuantity());
+            Request producerRequest = new Request(producer.getLocation(), request.getEnd(), request.getProductName(), request.getClientName(), request.getProductVolume(), request.getQuantity());
             if (request.getEnd() == producer.getLocation()) {
                 fulfilledRequest = new FulfilledRequest(producerRequest);
                 fulfilledRequest.setDispatches(new ArrayList<>());

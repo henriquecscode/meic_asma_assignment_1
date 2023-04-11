@@ -4,6 +4,8 @@ import Agents.Protocols;
 import Client.Client;
 import Company.FulfilledRequest;
 import Company.Request;
+import Producer.Producer;
+import Product.Product;
 import App.App;
 import World.AgentWorld;
 import jade.core.Agent;
@@ -120,7 +122,8 @@ public class ClientAgent extends Agent {
             for (DFAgentDescription producer : requestedProductproducers) {
                 cfp.addReceiver(producer.getName());
             }
-            Request request = new Request(null, client.getHouse(), requestedProduct, getLocalName(), 1);
+            Product product = Producer.getProduct(requestedProduct);
+            Request request = new Request(null, client.getHouse(), requestedProduct, getLocalName(), product.getVolume(), 1);
             cfp.setContent(request.toString());
             cfp.setProtocol(Protocols.PRODUCT_REQUEST.name());
 

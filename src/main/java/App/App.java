@@ -39,10 +39,11 @@ public class App {
         world.run();
         System.out.println("Hello, World!");
         Scanner scanner = new Scanner(System.in);
-        scanner.nextLine();
-//        world.testProducerAgent();
-        world.testClientAgent();
-        scanner.nextLine();
+        String input = "";
+        while (!input.equals("exit")) {
+            input = scanner.nextLine();
+            world.testClientAgent();
+        }
         System.exit(0);
     }
 

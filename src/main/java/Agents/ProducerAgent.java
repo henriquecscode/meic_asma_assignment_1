@@ -103,7 +103,7 @@ public class ProducerAgent extends Agent {
         }
 
         protected Behaviour createResponder(ACLMessage cfp) {
-            System.out.println(myAgent.getLocalName() + ": Received product request from " + cfp.getSender().getLocalName());
+//            System.out.println(myAgent.getLocalName() + ": Received product request from " + cfp.getSender().getLocalName());
             return new ProductRequestContractNetResponder(myAgent, cfp);
         }
     }
@@ -212,7 +212,7 @@ public class ProducerAgent extends Agent {
 
                 for (ACLMessage response : responses) {
                     if (!acceptedProposalsSet.contains(response)) {
-                        System.out.println(myAgent.getLocalName() + " rejected proposal from " + response.getSender().getLocalName() + " for conversation id" + response.getConversationId());
+//                        System.out.println(myAgent.getLocalName() + " rejected proposal from " + response.getSender().getLocalName() + " for conversation id" + response.getConversationId());
                         ACLMessage reply = response.createReply();
                         reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
                         acceptances.add(reply);
@@ -222,7 +222,7 @@ public class ProducerAgent extends Agent {
 
             protected void handleAllResponses(Vector responses, Vector acceptances) {
 
-                System.out.println("got " + responses.size() + " responses!");
+//                System.out.println("got " + responses.size() + " responses!");
                 int numberRoutes = request.getRoute().size() - 1;
                 List<Double> prices = Arrays.asList(new Double[numberRoutes]);
                 Collections.fill(prices, Double.MAX_VALUE);
@@ -239,7 +239,7 @@ public class ProducerAgent extends Agent {
                                 companiesMessageByRoute.set(j, response);
                             }
                         }
-                        System.out.println(response.getUserDefinedParameter("log"));
+//                        System.out.println(response.getUserDefinedParameter("log"));
                     }
                 }
 
@@ -266,7 +266,7 @@ public class ProducerAgent extends Agent {
             }
 
             protected void handleAllResultNotifications(Vector resultNotifications) {
-                System.out.println("got " + resultNotifications.size() + " result notifs!");
+//                System.out.println("got " + resultNotifications.size() + " result notifs!");
             }
 
             private double calculatePrice(List<Double> prices) {
@@ -292,7 +292,7 @@ public class ProducerAgent extends Agent {
             @Override
             public void action() {
                 cleanReply();
-                System.out.println(getLocalName() + "sending accept/reject to companies of request" + fulfilledRequest.toString());
+//                System.out.println(getLocalName() + "sending accept/reject to companies of request" + fulfilledRequest.toString());
                 for (ACLMessage acceptedProposal : acceptedProposals) {
                     if (accept) {
                         fulfilledRequest.setStartedOn(World.getTime());

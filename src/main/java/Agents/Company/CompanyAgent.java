@@ -122,7 +122,7 @@ public class CompanyAgent extends Agent {
         }
 
         protected Behaviour createResponder(ACLMessage cfp) {
-            System.out.println(myAgent.getLocalName() + " got a route request from " + cfp.getSender().getLocalName() + "!");
+//            System.out.println(myAgent.getLocalName() + " got a route request from " + cfp.getSender().getLocalName() + "!");
             return new RouteRequestContractNetResponder(myAgent, cfp);
         }
 
@@ -142,16 +142,16 @@ public class CompanyAgent extends Agent {
                 reply.setContent(String.join(",", prices.stream().map(Object::toString).toArray(String[]::new)));
                 reply.addUserDefinedParameter("log", prices.toString() + " to " + cfp.getSender().getLocalName() + " (from " + myAgent.getLocalName() + ")");
                 // ...
-                System.out.println(myAgent.getLocalName() + " sending reply to route request from " + cfp.getSender().getName() + "!");
+//                System.out.println(myAgent.getLocalName() + " sending reply to route request from " + cfp.getSender().getName() + "!");
                 return reply;
             }
 
             protected void handleRejectProposal(ACLMessage cfp, ACLMessage propose, ACLMessage reject) {
-                System.out.println(myAgent.getLocalName() + " got a reject from " + reject.getSender().getLocalName() + "!");
+//                System.out.println(myAgent.getLocalName() + " got a reject from " + reject.getSender().getLocalName() + "!");
             }
 
             protected ACLMessage handleAcceptProposal(ACLMessage cfp, ACLMessage propose, ACLMessage accept) {
-                System.out.println(myAgent.getLocalName() + " got an accept from" + accept.getSender().getLocalName());
+//                System.out.println(myAgent.getLocalName() + " got an accept from" + accept.getSender().getLocalName());
                 ACLMessage reply = accept.createReply();
                 reply.setPerformative(ACLMessage.INFORM);
                 //split and parse the content
@@ -174,7 +174,7 @@ public class CompanyAgent extends Agent {
         }
 
         protected Behaviour createResponder(ACLMessage msg) {
-            System.out.println(myAgent.getLocalName() + " got a request dispatch from " + msg.getSender().getLocalName() + "!");
+//            System.out.println(myAgent.getLocalName() + " got a request dispatch from " + msg.getSender().getLocalName() + "!");
             return new RequestDispatchHandler(msg);
         }
 
@@ -210,7 +210,7 @@ public class CompanyAgent extends Agent {
         }
 
         protected Behaviour createResponder(ACLMessage msg) {
-            System.out.println(myAgent.getLocalName() + " got a request dispatch from " + msg.getSender().getLocalName() + "!");
+//            System.out.println(myAgent.getLocalName() + " got a request dispatch from " + msg.getSender().getLocalName() + "!");
             return new RequestArrivalHandler(msg);
         }
 
@@ -243,7 +243,7 @@ public class CompanyAgent extends Agent {
         if (firstDispatcher(fulfilledRequest)) {
             startRequest(fulfilledRequest);
         } else {
-            System.out.println(getLocalName() + "Not first dispatcher of " + fulfilledRequest.toString() + "!");
+//            System.out.println(getLocalName() + "Not first dispatcher of " + fulfilledRequest.toString() + "!");
         }
     }
 
@@ -398,7 +398,7 @@ public class CompanyAgent extends Agent {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        System.out.println(getLocalName() + " finished dispatch " + vehicle);
+//        System.out.println(getLocalName() + " finished dispatch " + vehicle);
 
         enRouteRequests.remove(vehicle);
         arriveVehicle(vehicle);
@@ -496,7 +496,7 @@ public class CompanyAgent extends Agent {
             RequestDispatch d = requestDispatches.get(i);
             if (!d.getCompanyName().equals(getLocalName())) {
                 message.addReceiver(new AID(d.getCompanyName(), AID.ISLOCALNAME));
-                System.out.println(getLocalName() + " sending requestDispatch to " + d.getCompanyName() + "!");
+//                System.out.println(getLocalName() + " sending requestDispatch to " + d.getCompanyName() + "!");
             }
         }
         message.setProtocol(Protocols.REQUEST_DISPATCHED.name());

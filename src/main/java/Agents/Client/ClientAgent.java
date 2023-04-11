@@ -68,13 +68,13 @@ public class ClientAgent extends Agent {
     }
 
     private List<DFAgentDescription> makeRequest(HashMap<String, List<DFAgentDescription>> productProducers) {
-        System.out.println("Client-agent " + getAID().getName() + " is making a request.");
+//        System.out.println("Client-agent " + getAID().getName() + " is making a request.");
         List<String> productKeys = new ArrayList<>(productProducers.keySet());
         String randomKey = productKeys.get(random.nextInt(productKeys.size()));
         List<DFAgentDescription> producers = productProducers.get(randomKey);
         System.out.println("Client-agent " + getAID().getName() + " is requesting " + randomKey + " from " + producers.size() + " producers.");
         for (DFAgentDescription producer : producers) {
-            System.out.println("Producer: " + producer.getName());
+//            System.out.println("Producer: " + producer.getName());
         }
         this.requestedProduct = randomKey;
         this.requestedProductproducers = producers;
@@ -91,7 +91,7 @@ public class ClientAgent extends Agent {
     }
 
     public void logRequest(FulfilledRequest request) {
-        System.out.println(request.toString());
+//        System.out.println(request.toString());
         String filename = getLocalName() + ".txt";
         String filepath = App.executionLogFolder + "/" + filename;
         PrintWriter writer;
@@ -171,7 +171,7 @@ public class ClientAgent extends Agent {
         }
 
         protected void handleAllResultNotifications(Vector resultNotifications) {
-            System.out.println("got " + resultNotifications.size() + " result notifs!");
+//            System.out.println("got " + resultNotifications.size() + " result notifs!");
         }
     }
 

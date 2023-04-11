@@ -465,7 +465,7 @@ public class Company {
         Thread vehicleDispatch = new Thread(() -> {
             try {
                 long time = vehicle.getTravelTime(route);
-                System.out.println("Vehicle " + vehicle.getName() + "sent from " + start.getName() + " to " + end.getName() + " will arrive in" + time + " ms");
+//                System.out.println("Vehicle " + vehicle.getName() + "sent from " + start.getName() + " to " + end.getName() + " will arrive in" + time + " ms");
                 Thread.sleep(time);
             } catch (InterruptedException e) {
                 e.printStackTrace();

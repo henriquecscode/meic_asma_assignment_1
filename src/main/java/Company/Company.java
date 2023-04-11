@@ -44,7 +44,6 @@ public class Company {
         for (Integer globalHubIndex : seedGlobalHubs) {
             Port port = network.getPorts().get(globalHubIndex);
             GlobalHub globalHub = new GlobalHub(this, port);
-            port.addHub(globalHub);
             this.hubs.add(globalHub);
             this.globalHubs.add(globalHub);
             this.globalHubsByLocation.put(globalHubIndex, globalHub);
@@ -56,7 +55,6 @@ public class Company {
             int hubCity = regionHubIndex.get(1);
             City city = network.getCitiesByLocation().get(hubPort).get(hubCity);
             RegionHub regionHub = new RegionHub(this, city);
-            city.addHub(regionHub);
             this.hubs.add(regionHub);
             this.regionHubs.add(regionHub);
             this.regionHubsByLocation.put(List.of(hubPort, hubCity), regionHub);

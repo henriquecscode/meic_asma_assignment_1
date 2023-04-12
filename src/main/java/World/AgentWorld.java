@@ -52,6 +52,7 @@ public class AgentWorld extends World {
             throw new RuntimeException(e);
         }
         clientSpawner = new ClientSpawnerThread(network, container);
+        clientSpawner.start();
         //        new ClientSpawnerThread(network, container).start(); // save thread to stop if necessary
     }
 

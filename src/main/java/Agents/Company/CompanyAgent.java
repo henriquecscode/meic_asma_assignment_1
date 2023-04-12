@@ -34,11 +34,11 @@ import java.util.*;
 
 public class CompanyAgent extends Agent {
 
-    private static Random random = new Random(1);
-    private Company company;
-    private Queue<FulfilledRequest> queuedRequests = new LinkedList<>();
-    private Map<Vehicle, List<CompanyRequest>> holdingRequests = new HashMap<>();
-    private Map<Vehicle, List<CompanyRequest>> enRouteRequests = new HashMap<>();
+    protected static Random random = new Random(1);
+    protected Company company;
+    protected Queue<FulfilledRequest> queuedRequests = new LinkedList<>();
+    protected Map<Vehicle, List<CompanyRequest>> holdingRequests = new HashMap<>();
+    protected Map<Vehicle, List<CompanyRequest>> enRouteRequests = new HashMap<>();
 
 
     public CompanyAgent(Company company) {
@@ -239,7 +239,7 @@ public class CompanyAgent extends Agent {
     }
 
 
-    private void handleFulfilledRequest(FulfilledRequest fulfilledRequest) {
+    protected void handleFulfilledRequest(FulfilledRequest fulfilledRequest) {
         if (firstDispatcher(fulfilledRequest)) {
             startRequest(fulfilledRequest);
         } else {
@@ -247,7 +247,7 @@ public class CompanyAgent extends Agent {
         }
     }
 
-    private boolean firstDispatcher(FulfilledRequest fulfilledRequest) {
+    protected boolean firstDispatcher(FulfilledRequest fulfilledRequest) {
         RequestDispatch requestDispatch = fulfilledRequest.getDispatch(0);
         String dispatcherName = requestDispatch.getCompanyName();
         if (dispatcherName.equals(getLocalName())) {
@@ -257,14 +257,20 @@ public class CompanyAgent extends Agent {
         }
     }
 
-    private void startRequest(FulfilledRequest fulfilledRequest) {
+    protected void startRequest(FulfilledRequest fulfilledRequest) {
         int requestStage = 0;
         RequestDispatch requestDispatch = fulfilledRequest.getDispatch(requestStage);
         executeRequest(fulfilledRequest, requestDispatch);
     }
 
-    private void continueRequest(FulfilledRequest fulfilledRequest) {
+    protected void continueRequest(FulfilledRequest fulfilledRequest) {
+        if (fulfilledRequest == null) {
+            return;
+        }
         int requestStage = fulfilledRequest.getRequestStage();
+        if (fulfilledRequest.isFinished()) {
+            return;
+        }
         RequestDispatch requestDispatch = fulfilledRequest.getDispatch(requestStage);
         if (!requestDispatch.getCompanyName().equals(getLocalName())) {
             return;
@@ -272,7 +278,7 @@ public class CompanyAgent extends Agent {
         executeRequest(fulfilledRequest, requestDispatch);
     }
 
-    private void executeRequest(FulfilledRequest fulfilledRequest, RequestDispatch requestDispatch) {
+    protected void executeRequest(FulfilledRequest fulfilledRequest, RequestDispatch requestDispatch) {
         Product product = Producer.getProduct(fulfilledRequest.getProductName());
         int quantity = fulfilledRequest.getQuantity();
         int cargoSpace = product.getVolume() * quantity;
@@ -285,9 +291,7 @@ public class CompanyAgent extends Agent {
             }
             prepareDispatch(fulfilledRequest, cargoSpace, vehicle);
             holdRequest(fulfilledRequest, requestDispatch, vehicle);
-            if (isSendDispatch(vehicle)) {
-                sendDispatch(vehicle);
-            }
+            processDispatch(vehicle);
         } else {
             Vehicle vehicle = getVehicleForRequest(fulfilledRequest, requestDispatch, cargoSpace);
             if (vehicle == null) {
@@ -296,14 +300,12 @@ public class CompanyAgent extends Agent {
                 Dispatch transferDispatch = new Dispatch(requestDispatch.getEnd(), requestDispatch.getStart(), requestDispatch.getCompanyName());
                 transferDispatch.setVehicle(vehicle);
                 holdRequest(fulfilledRequest, transferDispatch, vehicle);
-                if (isSendDispatch(vehicle)) {
-                    sendDispatch(vehicle);
-                }
+                processDispatch(vehicle);
             }
         }
     }
 
-    private void transferRequest(RequestDispatch requestDispatch, int cargoSpace, FulfilledRequest fulfilledRequest) {
+    protected void transferRequest(RequestDispatch requestDispatch, int cargoSpace, FulfilledRequest fulfilledRequest) {
         List<Vehicle> vehicles;
         Vehicle vehicle;
         vehicles = findEventualVehicle(requestDispatch, cargoSpace);
@@ -317,10 +319,12 @@ public class CompanyAgent extends Agent {
         if (vehicle.getLocation() == requestDispatch.getStart()) {
 //            throw new RuntimeException("Vehicle is already at the start");
             queueRequest(fulfilledRequest);
+            return;
         }
         if (vehicle.getLocation() == requestDispatch.getEnd()) {
 //            throw new RuntimeException("Vehicle is already at the end");
             queueRequest(fulfilledRequest);
+            return;
         }
         Dispatch transferDispatch;
         if (vehicle.getLocation() == vehicle.getHub().getLocation()) {
@@ -331,13 +335,17 @@ public class CompanyAgent extends Agent {
         }
         transferDispatch.setVehicle(vehicle);
         holdRequest(fulfilledRequest, transferDispatch, vehicle);
+        processDispatch(vehicle);
+    }
+
+    protected void processDispatch(Vehicle vehicle) {
         if (isSendDispatch(vehicle)) {
             sendDispatch(vehicle);
         }
     }
 
 
-    private Vehicle getBestVehicle(List<Vehicle> vehicles, Dispatch dispatch, int cargoSpace) {
+    protected Vehicle getBestVehicle(List<Vehicle> vehicles, Dispatch dispatch, int cargoSpace) {
         List<Vehicle> readyVehicles = new ArrayList<>();
         for (Vehicle vehicle : vehicles) {
             if (!vehicle.canFillUpCargo(cargoSpace)) {
@@ -377,21 +385,21 @@ public class CompanyAgent extends Agent {
     }
 
 
-    private List<Vehicle> findVehicle(RequestDispatch requestDispatch, int cargoSpace) {
+    protected List<Vehicle> findVehicle(RequestDispatch requestDispatch, int cargoSpace) {
         Location start = requestDispatch.getStart();
         Location end = requestDispatch.getEnd();
 
         return company.findVehicle(start, end, cargoSpace);
     }
 
-    private List<Vehicle> findEventualVehicle(RequestDispatch requestDispatch, int cargoSpace) {
+    protected List<Vehicle> findEventualVehicle(RequestDispatch requestDispatch, int cargoSpace) {
         Location start = requestDispatch.getStart();
         Location end = requestDispatch.getEnd();
 
         return company.findEventualVehicle(start, end, cargoSpace);
     }
 
-    private void prepareDispatch(FulfilledRequest fulfilledRequest, int cargoSpace, Vehicle vehicle) {
+    protected void prepareDispatch(FulfilledRequest fulfilledRequest, int cargoSpace, Vehicle vehicle) {
         RequestDispatch requestDispatch = fulfilledRequest.getDispatch();
         boolean loaded = loadVehicle(requestDispatch, vehicle, cargoSpace);
         if (!loaded) {
@@ -401,7 +409,7 @@ public class CompanyAgent extends Agent {
         }
     }
 
-    private boolean loadVehicle(RequestDispatch requestDispatch, Vehicle vehicle, int cargoSpace) {
+    protected boolean loadVehicle(RequestDispatch requestDispatch, Vehicle vehicle, int cargoSpace) {
         boolean couldLoad = vehicle.fillUpCargo(cargoSpace);
         if (!couldLoad) {
             return false;
@@ -412,11 +420,11 @@ public class CompanyAgent extends Agent {
     }
 
 
-    private boolean isSendDispatch(FulfilledRequest fulfilledRequest, Vehicle vehicle) {
+    protected boolean isSendDispatch(FulfilledRequest fulfilledRequest, Vehicle vehicle) {
         return true;
     }
 
-    private boolean isSendDispatch(Vehicle vehicle) {
+    protected boolean isSendDispatch(Vehicle vehicle) {
         if (!(vehicle.getState() instanceof Holding)) {
             throw new RuntimeException("Vehicle is not holding");
         }
@@ -428,7 +436,7 @@ public class CompanyAgent extends Agent {
         }
     }
 
-    private void sendDispatch(Vehicle vehicle) {
+    protected void sendDispatch(Vehicle vehicle) {
         List<CompanyRequest> requests = holdingRequests.remove(vehicle);
         enRouteRequests.put(vehicle, requests);
 
@@ -449,7 +457,7 @@ public class CompanyAgent extends Agent {
 
     }
 
-    private void handleArrival(Vehicle vehicle, List<CompanyRequest> requests) {
+    protected void handleArrival(Vehicle vehicle, List<CompanyRequest> requests) {
         for (CompanyRequest request : requests) {
             FulfilledRequest fulfilledRequest = request.getFulfilledRequest();
             continueRequest(fulfilledRequest);
@@ -466,14 +474,14 @@ public class CompanyAgent extends Agent {
 
     }
 
-    private void arriveVehicle(Vehicle vehicle) {
+    protected void arriveVehicle(Vehicle vehicle) {
         vehicle.emptyCargo();
         company.idleVehicle(vehicle);
 
     }
 
 
-    private void updateVehicleRequests(Vehicle vehicle, List<CompanyRequest> requests) {
+    protected void updateVehicleRequests(Vehicle vehicle, List<CompanyRequest> requests) {
         for (CompanyRequest request : requests) {
             FulfilledRequest fulfilledRequest = request.getFulfilledRequest();
             Dispatch dispatch = request.getDispatch();
@@ -487,7 +495,7 @@ public class CompanyAgent extends Agent {
         }
     }
 
-    private List<CompanyRequest> updateVehicleRequestsArrival(Vehicle vehicle, List<CompanyRequest> requests) {
+    protected List<CompanyRequest> updateVehicleRequestsArrival(Vehicle vehicle, List<CompanyRequest> requests) {
         List<CompanyRequest> proceedingRequests = new ArrayList<>();
         for (CompanyRequest request : requests) {
             FulfilledRequest fulfilledRequest = request.getFulfilledRequest();
@@ -521,7 +529,7 @@ public class CompanyAgent extends Agent {
         //inform the client too
     }
 
-    private void informClient(FulfilledRequest fulfilledRequest) {
+    protected void informClient(FulfilledRequest fulfilledRequest) {
         //sendDispatchInformClient
         String content = fulfilledRequest.toString();
         ACLMessage message = new ACLMessage(ACLMessage.INFORM);
@@ -531,7 +539,7 @@ public class CompanyAgent extends Agent {
         send(message);
     }
 
-    private void informParticipants(CompanyRequest companyRequest) {
+    protected void informParticipants(CompanyRequest companyRequest) {
         //sendDispatchInformParticipants
         FulfilledRequest fulfilledRequest = companyRequest.getFulfilledRequest();
         String content = fulfilledRequest.toString();
@@ -555,14 +563,14 @@ public class CompanyAgent extends Agent {
     }
 
 
-    private void updateVehicleDispatch(RequestDispatch requestDispatch, Vehicle vehicle) {
+    protected void updateVehicleDispatch(RequestDispatch requestDispatch, Vehicle vehicle) {
         requestDispatch.setVehicle(vehicle);
         requestDispatch.setVehicleFilledUpCargo(vehicle.getFilledUpCargo());
         requestDispatch.setDispatchedOn(World.getTime());
         requestDispatch.setIdleTime(requestDispatch.getDispatchedOn() - requestDispatch.getLoadedOn());
     }
 
-    private void informParticipantsArrival(FulfilledRequest fulfilledRequest) {
+    protected void informParticipantsArrival(FulfilledRequest fulfilledRequest) {
         Dispatch dispatch = fulfilledRequest.getDispatch();
         ACLMessage message = new ACLMessage(ACLMessage.INFORM);
         message.addReceiver(new AID(dispatch.getCompanyName(), AID.ISLOCALNAME));
@@ -572,7 +580,7 @@ public class CompanyAgent extends Agent {
     }
 
 
-    private void updateVehicleDispatchArrival(RequestDispatch requestDispatch, Vehicle vehicle) {
+    protected void updateVehicleDispatchArrival(RequestDispatch requestDispatch, Vehicle vehicle) {
         requestDispatch.setArrivedOn(World.getTime());
         requestDispatch.setTravelTime(requestDispatch.getArrivedOn() - requestDispatch.getDispatchedOn());
     }
@@ -581,7 +589,7 @@ public class CompanyAgent extends Agent {
 
     }
 
-    private boolean holdRequest(FulfilledRequest fulfilledRequest, Dispatch newDispatch, Vehicle vehicle) {
+    protected boolean holdRequest(FulfilledRequest fulfilledRequest, Dispatch newDispatch, Vehicle vehicle) {
         if (vehicle.getState() instanceof Idle) {
             Dispatch dispatch = new Dispatch(newDispatch.getStart(), newDispatch.getEnd(), newDispatch.getCompanyName());
             dispatch.setVehicle(vehicle);
@@ -605,14 +613,14 @@ public class CompanyAgent extends Agent {
     }
 
 
-    private void queueRequest(FulfilledRequest fulfilledRequest) {
+    protected void queueRequest(FulfilledRequest fulfilledRequest) {
         queuedRequests.add(fulfilledRequest);
-        System.out.println(getLocalName() + " queueing request is now at " + queuedRequests.size());
+//        System.out.println(getLocalName() + " queueing request is now at " + queuedRequests.size());
     }
 
 
-    private Vehicle getVehicleForRequest(FulfilledRequest fulfilledRequest, RequestDispatch requestDispatch,
-                                         int cargoSpace) {
+    protected Vehicle getVehicleForRequest(FulfilledRequest fulfilledRequest, RequestDispatch requestDispatch,
+                                           int cargoSpace) {
         Location start = requestDispatch.getStart();
         Location end = requestDispatch.getEnd();
         List<Vehicle> vehicles = company.findVehicle(end, start, 0);

@@ -291,9 +291,7 @@ public class CompanyAgent extends Agent {
             }
             prepareDispatch(fulfilledRequest, cargoSpace, vehicle);
             holdRequest(fulfilledRequest, requestDispatch, vehicle);
-            if (isSendDispatch(vehicle)) {
-                sendDispatch(vehicle);
-            }
+            processDispatch(vehicle);
         } else {
             Vehicle vehicle = getVehicleForRequest(fulfilledRequest, requestDispatch, cargoSpace);
             if (vehicle == null) {
@@ -302,9 +300,7 @@ public class CompanyAgent extends Agent {
                 Dispatch transferDispatch = new Dispatch(requestDispatch.getEnd(), requestDispatch.getStart(), requestDispatch.getCompanyName());
                 transferDispatch.setVehicle(vehicle);
                 holdRequest(fulfilledRequest, transferDispatch, vehicle);
-                if (isSendDispatch(vehicle)) {
-                    sendDispatch(vehicle);
-                }
+                processDispatch(vehicle);
             }
         }
     }
@@ -339,6 +335,10 @@ public class CompanyAgent extends Agent {
         }
         transferDispatch.setVehicle(vehicle);
         holdRequest(fulfilledRequest, transferDispatch, vehicle);
+        processDispatch(vehicle);
+    }
+
+    protected void processDispatch(Vehicle vehicle) {
         if (isSendDispatch(vehicle)) {
             sendDispatch(vehicle);
         }

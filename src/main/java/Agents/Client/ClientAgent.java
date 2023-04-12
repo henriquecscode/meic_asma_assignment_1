@@ -1,5 +1,6 @@
 package Agents.Client;
 
+import Client.ClientSpawnerThread;
 import Agents.Protocols;
 import Client.Client;
 import Company.FulfilledRequest;
@@ -88,6 +89,7 @@ public class ClientAgent extends Agent {
     public void concludeRequest(FulfilledRequest request) {
         System.out.println("SUCCESS Client-agent " + getAID().getLocalName() + " received a product: " + request.getProductName());
         logRequest(request);
+        ClientSpawnerThread.incClientDones();
         AgentWorld.agents.remove(this);
         doDelete();
     }
@@ -167,6 +169,7 @@ public class ClientAgent extends Agent {
 
             if (bestIndex == -1) {
                 System.out.println("Client-agent " + getAID().getLocalName() + " did not get a suitable response from any producer.");
+                ClientSpawnerThread.incClientDones();
                 return;
             }
 

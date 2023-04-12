@@ -24,6 +24,7 @@ public class AgentWorld extends World {
     private List<ProducerAgent> producersAgents = new ArrayList<>();
     private List<CompanyAgent> agentsAgents = new ArrayList<>();
     public static List<Agent> agents = new ArrayList<>();
+    public ClientSpawnerThread clientSpawner;
 
     public AgentWorld() {
         super();
@@ -33,7 +34,6 @@ public class AgentWorld extends World {
         super(seed);
     }
 
-    ClientSpawnerThread clientSpawner;
 
     public AgentWorld(String networkSeedFilename, String fleetSeedFilename, java.util.List<String> companySeedFilenames, List<String> producerSeedFilenames) {
         super(networkSeedFilename, fleetSeedFilename, companySeedFilenames, producerSeedFilenames);
@@ -52,7 +52,7 @@ public class AgentWorld extends World {
     }
 
     public void log() {
-        worldSeed.saveSeed(App.executionLogFolderSettings,"/worldSeed.txt");
+        worldSeed.saveSeed(App.executionLogFolderSettings, "/worldSeed.txt");
         clientSpawner.save(App.executionLogFolderSettings + "/clientSeed.txt");
     }
 

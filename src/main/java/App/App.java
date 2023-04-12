@@ -62,8 +62,11 @@ public class App {
         world.startAgents();
         world.log();
         world.start();
-        Scanner scanner = new Scanner(System.in);
-        scanner.nextLine();
+        try {
+            world.clientSpawner.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         System.exit(0);
     }
 

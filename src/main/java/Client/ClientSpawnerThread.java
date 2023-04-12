@@ -18,12 +18,13 @@ import java.util.Random;
 public class ClientSpawnerThread extends Thread {
     public static final int MIN_SPAWN_INTERVAL_MS = 20;
     public static final int MAX_SPAWN_INTERVAL_MS = 200;
-    public static final int MAX_CLIENTS = 200;
+    public static final int MAX_CLIENTS = 50;
 
     public static final Random random = new Random(1);
     private final Network network;
     private final ContainerController container;
     private static int clientIndex = 0;
+    private static int clientDones = 0;
 
     public ClientSpawnerThread(Network network, ContainerController container) {
         this.network = network;
@@ -65,10 +66,26 @@ public class ClientSpawnerThread extends Thread {
                 e.printStackTrace();
             }
         }
+        while (clientDones < MAX_CLIENTS) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("-----------------------------EXECUTION CONCLUDED------------------------------");
     }
 
     public static int getClientIndex() {
         return clientIndex;
+    }
+
+    public static int getClientDones() {
+        return clientDones;
+    }
+
+    public static void incClientDones() {
+        clientDones++;
     }
 
     public void save(String filename) {

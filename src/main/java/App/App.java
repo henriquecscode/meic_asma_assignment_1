@@ -1,6 +1,7 @@
 package App;
 
 import World.AgentWorld;
+import World.World;
 import utils.GetDate;
 
 import java.io.File;
@@ -48,6 +49,10 @@ public class App {
             input = scanner.nextLine();
         }
         System.exit(0);
+    }
+
+    public static void seeder() {
+        World world = new World();
     }
 
     public static void init() {

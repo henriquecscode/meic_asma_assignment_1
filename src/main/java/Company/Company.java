@@ -455,18 +455,19 @@ public class Company {
             availableSemis = availableSemis.stream().filter(s -> s.getCargoCapacity() >= cargoSize).collect(Collectors.toList());
             return availableSemis.stream().map(v -> (Vehicle) v).collect(Collectors.toList());
         } else if (routeType == RouteType.International) {
-            GlobalHub globalHub = null;
-            List<Ship> hubShips = new ArrayList<>();
-            if (start instanceof Port) {
-                globalHub = (GlobalHub) findLocationHub(start);
-                hubShips.addAll(globalHub.getShips());
-            }
-            if (end instanceof Port) {
-                globalHub = (GlobalHub) findLocationHub(end);
-                hubShips.addAll(globalHub.getShips());
-            }
-            List<Ship> idlingShips = ships.getIdlingVehicles();
-            List<Vehicle> availableShips = idlingShips.stream().filter(hubShips::contains).collect(Collectors.toList());
+            List<Ship> availableShips = ships.getIdlingVehicles();
+//            GlobalHub globalHub = null;
+//            List<Ship> hubShips = new ArrayList<>();
+//            if (start instanceof Port) {
+//                globalHub = (GlobalHub) findLocationHub(start);
+//                hubShips.addAll(globalHub.getShips());
+//            }
+//            if (end instanceof Port) {
+//                globalHub = (GlobalHub) findLocationHub(end);
+//                hubShips.addAll(globalHub.getShips());
+//            }
+//            List<Ship> idlingShips = ships.getIdlingVehicles();
+//            List<Vehicle> availableShips = idlingShips.stream().filter(hubShips::contains).collect(Collectors.toList());
             availableShips = availableShips.stream().filter(s -> s.getCargoCapacity() >= cargoSize).collect(Collectors.toList());
             return availableShips.stream().map(v -> (Vehicle) v).collect(Collectors.toList());
 

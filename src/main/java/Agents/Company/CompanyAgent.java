@@ -263,8 +263,14 @@ public class CompanyAgent extends Agent {
         executeRequest(fulfilledRequest, requestDispatch);
     }
 
-    private void continueRequest(FulfilledRequest fulfilledRequest) {
+    protected void continueRequest(FulfilledRequest fulfilledRequest) {
+        if (fulfilledRequest == null) {
+            return;
+        }
         int requestStage = fulfilledRequest.getRequestStage();
+        if (fulfilledRequest.isFinished()) {
+            return;
+        }
         RequestDispatch requestDispatch = fulfilledRequest.getDispatch(requestStage);
         if (!requestDispatch.getCompanyName().equals(getLocalName())) {
             return;

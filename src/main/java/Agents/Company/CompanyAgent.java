@@ -323,10 +323,12 @@ public class CompanyAgent extends Agent {
         if (vehicle.getLocation() == requestDispatch.getStart()) {
 //            throw new RuntimeException("Vehicle is already at the start");
             queueRequest(fulfilledRequest);
+            return;
         }
         if (vehicle.getLocation() == requestDispatch.getEnd()) {
 //            throw new RuntimeException("Vehicle is already at the end");
             queueRequest(fulfilledRequest);
+            return;
         }
         Dispatch transferDispatch;
         if (vehicle.getLocation() == vehicle.getHub().getLocation()) {

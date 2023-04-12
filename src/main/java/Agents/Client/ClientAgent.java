@@ -74,7 +74,7 @@ public class ClientAgent extends Agent {
         List<String> productKeys = new ArrayList<>(productProducers.keySet());
         String randomKey = productKeys.get(random.nextInt(productKeys.size()));
         List<DFAgentDescription> producers = productProducers.get(randomKey);
-        System.out.println("Client-agent " + getAID().getName() + " is requesting " + randomKey + " from " + producers.size() + " producers.");
+        System.out.println("Client-agent " + getLocalName() + " is requesting " + randomKey + " from " + producers.size() + " producers.");
         for (DFAgentDescription producer : producers) {
 //            System.out.println("Producer: " + producer.getName());
         }

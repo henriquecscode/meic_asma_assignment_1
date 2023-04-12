@@ -18,7 +18,7 @@ import java.util.Random;
 public class ClientSpawnerThread extends Thread {
     public static final int MIN_SPAWN_INTERVAL_MS = 20;
     public static final int MAX_SPAWN_INTERVAL_MS = 200;
-    public static final int MAX_CLIENTS = 200;
+    public static final int MAX_CLIENTS = 100;
 
     public static final Random random = new Random(1);
     private final Network network;

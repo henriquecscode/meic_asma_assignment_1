@@ -4,13 +4,13 @@ import utils.CreatorInterface;
 
 public class VanCreator extends VehicleCreator implements CreatorInterface {
 
-    private static int CARGO = 0;
-    private static int SPEED = 0;
+    private static int CARGO = 120;
+    private static int SPEED = 20;
     private static int COST_PER_MILE = 0;
     private static int UPKEEP = 0;
 
     public VanCreator() {
-        super();
+        super(CARGO, SPEED, COST_PER_MILE, UPKEEP);
     }
 
     VanCreator(int cargo, int speed, int costPerMile, int upkeep) {

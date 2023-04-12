@@ -266,6 +266,9 @@ public class CompanyAgent extends Agent {
     private void continueRequest(FulfilledRequest fulfilledRequest) {
         int requestStage = fulfilledRequest.getRequestStage();
         RequestDispatch requestDispatch = fulfilledRequest.getDispatch(requestStage);
+        if (!requestDispatch.getCompanyName().equals(getLocalName())) {
+            return;
+        }
         executeRequest(fulfilledRequest, requestDispatch);
     }
 

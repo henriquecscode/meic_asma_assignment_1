@@ -2,12 +2,9 @@ package World;
 
 import Agents.ClientAgent;
 import Agents.ProducerAgent;
+import App.App;
 import Client.ClientSpawnerThread;
 import Agents.Company.CompanyAgent;
-import Agents.Company.CompanyGlobalHubAgent;
-import Agents.Company.CompanyRegionHubAgent;
-import Company.GlobalHub;
-import Company.RegionHub;
 import Company.Company;
 import Producer.Producer;
 import jade.core.Agent;
@@ -42,7 +39,7 @@ public class AgentWorld extends World {
         super(networkSeedFilename, fleetSeedFilename, companySeedFilenames, producerSeedFilenames);
     }
 
-    public void run() {
+    public void startAgents() {
         initJade();
 
         try {
@@ -52,8 +49,11 @@ public class AgentWorld extends World {
             throw new RuntimeException(e);
         }
         clientSpawner = new ClientSpawnerThread(network, container);
-        clientSpawner.start();
-        //        new ClientSpawnerThread(network, container).start(); // save thread to stop if necessary
+    }
+
+    public void log() {
+        worldSeed.saveSeed(App.executionLogFolderSettings,"/worldSeed.txt");
+        clientSpawner.save(App.executionLogFolderSettings + "/clientSeed.txt");
     }
 
     private void makeProducers() throws StaleProxyException {
@@ -107,6 +107,10 @@ public class AgentWorld extends World {
 
         }
 
+    }
+
+    public void start() {
+        clientSpawner.start();
     }
 
     private void initJade() {

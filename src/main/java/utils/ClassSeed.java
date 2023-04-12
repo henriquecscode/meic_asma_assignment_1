@@ -33,9 +33,13 @@ public abstract class ClassSeed implements SeedInterface {
         this.saveSeed(filename);
     }
 
-
     public void saveSeed(String filename) {
-        String filepath = this.getPath() + filename + ".txt";
+        this.saveSeed(this.getPath(), filename + ".txt");
+    }
+
+    public void saveSeed(String relativePath, String filename) {
+
+        String filepath = relativePath + filename;
         PrintWriter writer;
         File file = new File(filepath);
         try {

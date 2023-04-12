@@ -8,13 +8,17 @@ import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Random;
 
 public class ClientSpawnerThread extends Thread {
     public static final int MIN_SPAWN_INTERVAL_MS = 20;
     public static final int MAX_SPAWN_INTERVAL_MS = 200;
-    public static final int MAX_CLIENTS = 100;
+    public static final int MAX_CLIENTS = 200;
 
     public static final Random random = new Random(1);
     private final Network network;
@@ -65,5 +69,28 @@ public class ClientSpawnerThread extends Thread {
 
     public static int getClientIndex() {
         return clientIndex;
+    }
+
+    public void save(String filename) {
+        String filepath = filename;
+        PrintWriter writer;
+        File file = new File(filepath);
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            writer = new PrintWriter(file);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        writer.print(this);
+        writer.close();
+    }
+
+    @Override
+    public String toString() {
+        return ClientSpawnerThread.MIN_SPAWN_INTERVAL_MS + " " + ClientSpawnerThread.MAX_SPAWN_INTERVAL_MS + " " + ClientSpawnerThread.MAX_CLIENTS;
     }
 }

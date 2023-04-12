@@ -277,7 +277,20 @@ public class CompanyAgent extends Agent {
         if (!vehicles.isEmpty()) {
             Vehicle vehicle = getBestVehicle(vehicles, requestDispatch, cargoSpace);
             if (vehicle == null) {
-                queueRequest(fulfilledRequest);
+                vehicles = findEventualVehicle(requestDispatch, cargoSpace);
+                if (vehicles.isEmpty()) {
+//                    System.out.println(getLocalName() + " no vehicles found. Must be in transit");
+                    queueRequest(fulfilledRequest);
+                    return;
+                }
+//                System.out.println(getLocalName() + "Sending a vehicle to make a connectiong");
+                vehicle = getBestVehicle(vehicles, requestDispatch, cargoSpace);
+                Dispatch transferDispatch = new Dispatch(vehicle.getLocation(), vehicle.getHub().getLocation(), requestDispatch.getCompanyName());
+                transferDispatch.setVehicle(vehicle);
+                holdRequest(fulfilledRequest, transferDispatch, vehicle);
+                if (isSendDispatch(vehicle)) {
+                    sendDispatch(vehicle);
+                }
                 return;
             }
             prepareDispatch(fulfilledRequest, cargoSpace, vehicle);
@@ -288,8 +301,20 @@ public class CompanyAgent extends Agent {
         } else {
             Vehicle vehicle = getVehicleForRequest(fulfilledRequest, requestDispatch, cargoSpace);
             if (vehicle == null) {
-                queueRequest(fulfilledRequest);
-                return;
+                vehicles = findEventualVehicle(requestDispatch, cargoSpace);
+                if (vehicles.isEmpty()) {
+//                    System.out.println(getLocalName() + " no vehicles found. Must be in transit");
+                    queueRequest(fulfilledRequest);
+                    return;
+                }
+//                System.out.println(getLocalName() + "Sending a vehicle to make a connectiong");
+                vehicle = getBestVehicle(vehicles, requestDispatch, cargoSpace);
+                Dispatch transferDispatch = new Dispatch(vehicle.getLocation(), vehicle.getHub().getLocation(), requestDispatch.getCompanyName());
+                transferDispatch.setVehicle(vehicle);
+                holdRequest(fulfilledRequest, transferDispatch, vehicle);
+                if (isSendDispatch(vehicle)) {
+                    sendDispatch(vehicle);
+                }
             } else {
                 Dispatch transferDispatch = new Dispatch(requestDispatch.getEnd(), requestDispatch.getStart(), requestDispatch.getCompanyName());
                 transferDispatch.setVehicle(vehicle);
@@ -300,6 +325,7 @@ public class CompanyAgent extends Agent {
             }
         }
     }
+
 
     private Vehicle getBestVehicle(List<Vehicle> vehicles, Dispatch dispatch, int cargoSpace) {
         List<Vehicle> readyVehicles = new ArrayList<>();
@@ -348,6 +374,12 @@ public class CompanyAgent extends Agent {
         return company.findVehicle(start, end, cargoSpace);
     }
 
+    private List<Vehicle> findEventualVehicle(RequestDispatch requestDispatch, int cargoSpace) {
+        Location start = requestDispatch.getStart();
+        Location end = requestDispatch.getEnd();
+
+        return company.findEventualVehicle(start, end, cargoSpace);
+    }
 
     private void prepareDispatch(FulfilledRequest fulfilledRequest, int cargoSpace, Vehicle vehicle) {
         RequestDispatch requestDispatch = fulfilledRequest.getDispatch();
@@ -415,8 +447,12 @@ public class CompanyAgent extends Agent {
         if (queuedRequests.isEmpty()) {
             return;
         }
-        FulfilledRequest request = queuedRequests.remove();
-        continueRequest(request);
+        while (!queuedRequests.isEmpty()) {
+            FulfilledRequest request = queuedRequests.remove();
+            System.out.println(getLocalName() + "queueRequests reducing to " + queuedRequests.size());
+            continueRequest(request);
+        }
+        System.out.println(getLocalName() + "Emptied queue------");
 
     }
 
@@ -561,6 +597,7 @@ public class CompanyAgent extends Agent {
 
     private void queueRequest(FulfilledRequest fulfilledRequest) {
         queuedRequests.add(fulfilledRequest);
+        System.out.println(getLocalName() + " queueing request is now at " + queuedRequests.size());
     }
 
 

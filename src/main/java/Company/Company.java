@@ -425,6 +425,56 @@ public class Company {
         return vehicles.stream().map(v -> (Vehicle) v).collect(Collectors.toList());
     }
 
+    public List<Vehicle> findEventualVehicle(Location start, Location end, int cargoSize) {
+        //Find a vehicle that can get there through an intermediate step
+        // Based on sending a vehicle to its hub
+        RouteType routeType = getRouteType(start, end);
+        List<? extends Vehicle> vehicles;
+        if (routeType == RouteType.Neighbour) {
+            RegionHub regionHub = null;
+            if (start instanceof City) {
+                regionHub = (RegionHub) findLocationHub(start);
+            } else {
+                regionHub = (RegionHub) findLocationHub(end);
+            }
+            List<Van> hubVans = regionHub.getVans();
+            List<Van> idlingVans = vans.getIdlingVehicles();
+            List<Vehicle> availableVans = idlingVans.stream().filter(hubVans::contains).collect(Collectors.toList());
+            availableVans = availableVans.stream().filter(s -> s.getCargoCapacity() >= cargoSize).collect(Collectors.toList());
+            return availableVans.stream().map(v -> (Vehicle) v).collect(Collectors.toList());
+        } else if (routeType == RouteType.Regional) {
+            GlobalHub globalHub = null;
+            if (start instanceof City) {
+                globalHub = (GlobalHub) findLocationHub(((City) start).getPort());
+            } else {
+                globalHub = (GlobalHub) findLocationHub(((City) end).getPort());
+            }
+            List<Semi> hubSemis = globalHub.getSemis();
+            List<Semi> idlingSemis = semis.getIdlingVehicles();
+            List<Vehicle> availableSemis = idlingSemis.stream().filter(hubSemis::contains).collect(Collectors.toList());
+            availableSemis = availableSemis.stream().filter(s -> s.getCargoCapacity() >= cargoSize).collect(Collectors.toList());
+            return availableSemis.stream().map(v -> (Vehicle) v).collect(Collectors.toList());
+        } else if (routeType == RouteType.International) {
+            GlobalHub globalHub = null;
+            List<Ship> hubShips = new ArrayList<>();
+            if (start instanceof Port) {
+                globalHub = (GlobalHub) findLocationHub(start);
+                hubShips.addAll(globalHub.getShips());
+            }
+            if (end instanceof Port) {
+                globalHub = (GlobalHub) findLocationHub(end);
+                hubShips.addAll(globalHub.getShips());
+            }
+            List<Ship> idlingShips = ships.getIdlingVehicles();
+            List<Vehicle> availableShips = idlingShips.stream().filter(hubShips::contains).collect(Collectors.toList());
+            availableShips = availableShips.stream().filter(s -> s.getCargoCapacity() >= cargoSize).collect(Collectors.toList());
+            return availableShips.stream().map(v -> (Vehicle) v).collect(Collectors.toList());
+
+        } else {
+            throw new IllegalArgumentException("Invalid route type");
+        }
+    }
+
     public List<Vehicle> findAnyVehicle(Location start, Location end, int cargoSize) {
         RouteType routeType = getRouteType(start, end);
         List<? extends Vehicle> vehicles = new ArrayList<>();
@@ -438,6 +488,7 @@ public class Company {
             if (regionHub != null) {
                 vehicles = regionHub.getVans();
             }
+            vehicles = vehicles.stream().filter(s -> s.getCargoCapacity() >= cargoSize).collect(Collectors.toList());
             return vehicles.stream().map(v -> (Vehicle) v).collect(Collectors.toList());
         } else if (routeType == RouteType.Regional) {
             List<Semi> semis = new ArrayList<>();
@@ -456,6 +507,8 @@ public class Company {
             if (globalHub != null) {
                 semis.addAll(globalHub.getSemis());
             }
+            semis = semis.stream().filter(s -> s.getCargoCapacity() >= cargoSize).collect(Collectors.toList());
+
             return semis.stream().map(v -> (Vehicle) v).collect(Collectors.toList());
         } else if (routeType == RouteType.International) {
             GlobalHub g1 = (GlobalHub) findLocationHub(start);

@@ -5,6 +5,7 @@ import Network.Network;
 
 public class RequestDispatch extends Dispatch {
     private static final int PARENT_ATTRIBUTES = 7;
+    private long startedOn = -1;
     private long loadedOn = -1;
     private long holdingTime = -1; //time until a vehicle loads it
     private long dispatchedOn = -1;
@@ -23,15 +24,26 @@ public class RequestDispatch extends Dispatch {
         super(network, dispatch);
         String[] dispatchInfo = dispatch.split(SEP);
         int i = PARENT_ATTRIBUTES;
-        this.loadedOn = Integer.parseInt(dispatchInfo[i + 0]);
-        this.holdingTime = Integer.parseInt(dispatchInfo[i + 1]);
-        this.dispatchedOn = Integer.parseInt(dispatchInfo[i + 2]);
-        this.idleTime = Integer.parseInt(dispatchInfo[i + 3]);
-        this.arrivedOn = Integer.parseInt(dispatchInfo[i + 4]);
-        this.travelTime = Integer.parseInt(dispatchInfo[i + 5]);
-        this.requestStage = Integer.parseInt(dispatchInfo[i + 6]);
+        this.startedOn = Integer.parseInt(dispatchInfo[i + 0]);
+        this.loadedOn = Integer.parseInt(dispatchInfo[i + 1]);
+        this.holdingTime = Integer.parseInt(dispatchInfo[i + 2]);
+        this.dispatchedOn = Integer.parseInt(dispatchInfo[i + 3]);
+        this.idleTime = Integer.parseInt(dispatchInfo[i + 4]);
+        this.arrivedOn = Integer.parseInt(dispatchInfo[i + 5]);
+        this.travelTime = Integer.parseInt(dispatchInfo[i + 6]);
+        this.requestStage = Integer.parseInt(dispatchInfo[i + 7]);
+
     }
 
+    public long getStartedOn() {
+        return startedOn;
+    }
+
+    public void setStartedOn(long startedOn) {
+        if(this.startedOn == -1) {
+            this.startedOn = startedOn;
+        }
+    }
 
     public long getLoadedOn() {
         return loadedOn;
@@ -39,15 +51,13 @@ public class RequestDispatch extends Dispatch {
 
     public void setLoadedOn(long loadedOn) {
         this.loadedOn = loadedOn;
+        this.holdingTime = loadedOn - startedOn;
     }
 
     public long getHoldingTime() {
         return holdingTime;
     }
 
-    public void setHoldingTime(long holdingTime) {
-        this.holdingTime = holdingTime;
-    }
 
     public long getDispatchedOn() {
         return dispatchedOn;
@@ -55,15 +65,13 @@ public class RequestDispatch extends Dispatch {
 
     public void setDispatchedOn(long dispatchedOn) {
         this.dispatchedOn = dispatchedOn;
+        this.idleTime = this.dispatchedOn - this.loadedOn;
     }
 
     public long getIdleTime() {
         return idleTime;
     }
 
-    public void setIdleTime(long idleTime) {
-        this.idleTime = idleTime;
-    }
 
     public long getArrivedOn() {
         return arrivedOn;
@@ -71,14 +79,11 @@ public class RequestDispatch extends Dispatch {
 
     public void setArrivedOn(long arrivedOn) {
         this.arrivedOn = arrivedOn;
+        this.travelTime = this.arrivedOn - this.dispatchedOn;
     }
 
     public long getTravelTime() {
         return travelTime;
-    }
-
-    public void setTravelTime(long travelTime) {
-        this.travelTime = travelTime;
     }
 
     public int getRequestStage() {
@@ -87,6 +92,6 @@ public class RequestDispatch extends Dispatch {
 
     @Override
     public String toString() {
-        return super.toString() + SEP + loadedOn + SEP + holdingTime + SEP + dispatchedOn + SEP + idleTime + SEP + arrivedOn + SEP + travelTime + SEP + requestStage;
+        return super.toString() + SEP + startedOn + SEP + loadedOn + SEP + holdingTime + SEP + dispatchedOn + SEP + idleTime + SEP + arrivedOn + SEP + travelTime + SEP + requestStage;
     }
 }

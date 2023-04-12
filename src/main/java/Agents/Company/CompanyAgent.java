@@ -279,6 +279,7 @@ public class CompanyAgent extends Agent {
     }
 
     protected void executeRequest(FulfilledRequest fulfilledRequest, RequestDispatch requestDispatch) {
+        requestDispatch.setStartedOn(World.getTime());
         Product product = Producer.getProduct(fulfilledRequest.getProductName());
         int quantity = fulfilledRequest.getQuantity();
         int cargoSpace = product.getVolume() * quantity;
@@ -404,8 +405,6 @@ public class CompanyAgent extends Agent {
         boolean loaded = loadVehicle(requestDispatch, vehicle, cargoSpace);
         if (!loaded) {
             throw new RuntimeException("Could not fill up cargo");
-        } else {
-            requestDispatch.setHoldingTime(requestDispatch.getLoadedOn() - fulfilledRequest.getStartedOn());
         }
     }
 
@@ -567,7 +566,6 @@ public class CompanyAgent extends Agent {
         requestDispatch.setVehicle(vehicle);
         requestDispatch.setVehicleFilledUpCargo(vehicle.getFilledUpCargo());
         requestDispatch.setDispatchedOn(World.getTime());
-        requestDispatch.setIdleTime(requestDispatch.getDispatchedOn() - requestDispatch.getLoadedOn());
     }
 
     protected void informParticipantsArrival(FulfilledRequest fulfilledRequest) {
@@ -582,7 +580,6 @@ public class CompanyAgent extends Agent {
 
     protected void updateVehicleDispatchArrival(RequestDispatch requestDispatch, Vehicle vehicle) {
         requestDispatch.setArrivedOn(World.getTime());
-        requestDispatch.setTravelTime(requestDispatch.getArrivedOn() - requestDispatch.getDispatchedOn());
     }
 
     public void prepareRequest(FulfilledRequest fulfilledRequest) {

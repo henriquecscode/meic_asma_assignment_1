@@ -55,6 +55,18 @@ public class App {
         World world = new World();
     }
 
+    public static void experiment() {
+        worldSeed = "experiment";
+        init();
+        AgentWorld world = new AgentWorld();
+        world.startAgents();
+        world.log();
+        world.start();
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine();
+        System.exit(0);
+    }
+
     public static void init() {
         for (String folder : SUB_DATA_FOLDERS) {
             File subDataFolder = new File(DATA_FOLDER, folder);

@@ -50,6 +50,7 @@ public class ClientSpawnerThread extends Thread {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             if (clientIndex >= MAX_CLIENTS) {
+                System.out.println("----------------------CLIENT THREAD STOPPED-------------------------------");
                 break;
             }
             spawnClient();

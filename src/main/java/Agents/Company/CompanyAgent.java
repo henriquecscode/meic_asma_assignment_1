@@ -280,20 +280,7 @@ public class CompanyAgent extends Agent {
         if (!vehicles.isEmpty()) {
             Vehicle vehicle = getBestVehicle(vehicles, requestDispatch, cargoSpace);
             if (vehicle == null) {
-                vehicles = findEventualVehicle(requestDispatch, cargoSpace);
-                if (vehicles.isEmpty()) {
-//                    System.out.println(getLocalName() + " no vehicles found. Must be in transit");
-                    queueRequest(fulfilledRequest);
-                    return;
-                }
-//                System.out.println(getLocalName() + "Sending a vehicle to make a connectiong");
-                vehicle = getBestVehicle(vehicles, requestDispatch, cargoSpace);
-                Dispatch transferDispatch = new Dispatch(vehicle.getLocation(), vehicle.getHub().getLocation(), requestDispatch.getCompanyName());
-                transferDispatch.setVehicle(vehicle);
-                holdRequest(fulfilledRequest, transferDispatch, vehicle);
-                if (isSendDispatch(vehicle)) {
-                    sendDispatch(vehicle);
-                }
+                transferRequest(requestDispatch, cargoSpace, fulfilledRequest);
                 return;
             }
             prepareDispatch(fulfilledRequest, cargoSpace, vehicle);
@@ -304,20 +291,7 @@ public class CompanyAgent extends Agent {
         } else {
             Vehicle vehicle = getVehicleForRequest(fulfilledRequest, requestDispatch, cargoSpace);
             if (vehicle == null) {
-                vehicles = findEventualVehicle(requestDispatch, cargoSpace);
-                if (vehicles.isEmpty()) {
-//                    System.out.println(getLocalName() + " no vehicles found. Must be in transit");
-                    queueRequest(fulfilledRequest);
-                    return;
-                }
-//                System.out.println(getLocalName() + "Sending a vehicle to make a connectiong");
-                vehicle = getBestVehicle(vehicles, requestDispatch, cargoSpace);
-                Dispatch transferDispatch = new Dispatch(vehicle.getLocation(), vehicle.getHub().getLocation(), requestDispatch.getCompanyName());
-                transferDispatch.setVehicle(vehicle);
-                holdRequest(fulfilledRequest, transferDispatch, vehicle);
-                if (isSendDispatch(vehicle)) {
-                    sendDispatch(vehicle);
-                }
+                transferRequest(requestDispatch, cargoSpace, fulfilledRequest);
             } else {
                 Dispatch transferDispatch = new Dispatch(requestDispatch.getEnd(), requestDispatch.getStart(), requestDispatch.getCompanyName());
                 transferDispatch.setVehicle(vehicle);
@@ -326,6 +300,39 @@ public class CompanyAgent extends Agent {
                     sendDispatch(vehicle);
                 }
             }
+        }
+    }
+
+    private void transferRequest(RequestDispatch requestDispatch, int cargoSpace, FulfilledRequest fulfilledRequest) {
+        List<Vehicle> vehicles;
+        Vehicle vehicle;
+        vehicles = findEventualVehicle(requestDispatch, cargoSpace);
+        if (vehicles.isEmpty()) {
+//                    System.out.println(getLocalName() + " no vehicles found. Must be in transit");
+            queueRequest(fulfilledRequest);
+            return;
+        }
+//                System.out.println(getLocalName() + "Sending a vehicle to make a connectiong");
+        vehicle = getBestVehicle(vehicles, requestDispatch, cargoSpace);
+        if (vehicle.getLocation() == requestDispatch.getStart()) {
+//            throw new RuntimeException("Vehicle is already at the start");
+            queueRequest(fulfilledRequest);
+        }
+        if (vehicle.getLocation() == requestDispatch.getEnd()) {
+//            throw new RuntimeException("Vehicle is already at the end");
+            queueRequest(fulfilledRequest);
+        }
+        Dispatch transferDispatch;
+        if (vehicle.getLocation() == vehicle.getHub().getLocation()) {
+            //It must be a ship that is at the opposite hub
+            transferDispatch = new Dispatch(vehicle.getLocation(), requestDispatch.getStart(), requestDispatch.getCompanyName());
+        } else {
+            transferDispatch = new Dispatch(vehicle.getLocation(), vehicle.getHub().getLocation(), requestDispatch.getCompanyName());
+        }
+        transferDispatch.setVehicle(vehicle);
+        holdRequest(fulfilledRequest, transferDispatch, vehicle);
+        if (isSendDispatch(vehicle)) {
+            sendDispatch(vehicle);
         }
     }
 

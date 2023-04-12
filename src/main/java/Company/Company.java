@@ -346,7 +346,7 @@ public class Company {
     private List<Semi> findVehicleAvailableForRegionalRoute(Location start, Location end, int cargoSize) {
         RegionHub regionHub;
         GlobalHub globalHub;
-        List<Semi> semis;
+        List<Semi> semis = new ArrayList<>();
         if (start instanceof City) {
             regionHub = (RegionHub) findLocationHub(start);
             globalHub = (GlobalHub) findLocationHub(((City) start).getPort());
@@ -355,18 +355,16 @@ public class Company {
             globalHub = (GlobalHub) findLocationHub(((City) end).getPort());
         }
         if (regionHub != null) {
-            semis = findSemiInHub(regionHub, cargoSize);
-            if (!semis.isEmpty()) {
-                return semis;
-            }
+            semis.addAll(regionHub.getSemis());
         }
         if (globalHub != null) {
-            semis = findSemiInHub(globalHub, cargoSize);
-            if (!semis.isEmpty()) {
-                return semis;
-            }
+            semis.addAll(globalHub.getSemis());
         }
-        return new ArrayList<>();
+
+        List<Semi> idlingSemis = this.semis.getIdlingVehicles();
+        List<Vehicle> idlingVehicles = new ArrayList<>(idlingSemis);
+        List<Vehicle> fittingSemis = getFittingVehicleInLocation(idlingVehicles, start, cargoSize);
+        return fittingSemis.stream().map(v -> (Semi) v).collect(Collectors.toList());
     }
 
     private List<Ship> findShipForPort(GlobalHub hub, int cargoSize) {
@@ -388,26 +386,12 @@ public class Company {
     }
 
     private List<Ship> findVehicleAvailableForInternationalRoute(Location start, Location end, int cargoSize) {
-        GlobalHub hub;
-        hub = (GlobalHub) findLocationHub(start);
-        List<Ship> ships;
-        if (hub != null) {
-            ships = findShipInPort(hub, cargoSize);
+        List<Ship> idlingShips = ships.getIdlingVehicles();
+        List<Vehicle> idlingVehicles = new ArrayList<>(idlingShips);
 
-            if (!ships.isEmpty()) {
-                return ships;
-            }
-        }
-        for (Location port : start.getUpperLocations()) {
-            hub = (GlobalHub) findLocationHub(port);
-            if (hub != null) {
-                ships = findShipInPort(hub, cargoSize);
-                if (!ships.isEmpty()) {
-                    return ships;
-                }
-            }
-        }
-        return new ArrayList<>();
+        List<Vehicle> fittingShips = getFittingVehicleInLocation(idlingVehicles, start, cargoSize);
+        return fittingShips.stream().map(v -> (Ship) v).collect(Collectors.toList());
+
     }
 
     public List<Vehicle> findVehicle(Location start, Location end, int cargoSize) {

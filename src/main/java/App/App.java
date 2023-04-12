@@ -29,6 +29,7 @@ public class App {
     private final static String DEFAULT_WORLD_SEED = "2023_04_08_15_27_41_seed";
     private static String worldSeed = DEFAULT_WORLD_SEED;
     public static String executionLogFolder = "";
+    public static String executionLogFolderSettings = "";
 
     public static void run(String[] args) {
         if (args.length > 0) {
@@ -36,7 +37,9 @@ public class App {
         }
         init();
         AgentWorld world = new AgentWorld(worldSeed);
-        world.run();
+        world.startAgents();
+        world.log();
+        world.start();
         Scanner scanner = new Scanner(System.in);
         String input = "";
         input = scanner.nextLine();
@@ -68,6 +71,10 @@ public class App {
         executionLogFolder = executionsFolder + "/" + worldSeed + "_" + GetDate.getDate();
         File worldSeedFolder = new File(executionLogFolder);
         worldSeedFolder.mkdirs();
+
+        executionLogFolderSettings = executionLogFolder + "/settings";
+        File worldSeedSettingsFolder = new File(executionLogFolderSettings);
+        worldSeedSettingsFolder.mkdirs();
 
 
     }

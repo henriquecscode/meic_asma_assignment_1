@@ -1,6 +1,6 @@
 package World;
 
-import Agents.ClientAgent;
+import Agents.Client.ClientAgent;
 import Agents.ProducerAgent;
 import App.App;
 import Client.ClientSpawnerThread;
